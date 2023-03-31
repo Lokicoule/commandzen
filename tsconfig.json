@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.paths.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "strict": true,
+    "target": "ES2022",
+    "module": "commonjs",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

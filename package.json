@@ -1,0 +1,52 @@
+{
+  "name": "commandify",
+  "version": "0.0.1",
+  "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack && chmod +x dist/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lokicoule/commandify.git"
+  },
+  "keywords": [
+    "cli"
+  ],
+  "author": "Loik F.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Lokicoule/commandify/issues"
+  },
+  "homepage": "https://github.com/Lokicoule/commandify#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "release-it": "^15.9.3",
+    "ts-jest": "^29.0.5",
+    "ts-loader": "^9.4.2",
+    "webpack-cli": "^5.0.1"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/modules/**/*.(t|j)s",
+      "!**/index.(t|j)s",
+      "!**/types.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "webpack": "^5.77.0"
+  }
+}
