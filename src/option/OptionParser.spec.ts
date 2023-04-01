@@ -48,6 +48,20 @@ describe("OptionParser", () => {
       expect(result).toEqual({ value: 42, index: 1 });
     });
 
+    it("should parse a boolean option", () => {
+      option = new OptionConfig({
+        shortName: "-b",
+
+        longName: "--boolean",
+        argument: { type: "boolean" },
+      });
+      args = ["-b", "true"];
+
+      const result = OptionParser.parse(option, args, index);
+
+      expect(result).toEqual({ value: true, index: 1 });
+    });
+
     it("should throw an error for unknown type", () => {
       option = new OptionConfig({
         shortName: "-x",
