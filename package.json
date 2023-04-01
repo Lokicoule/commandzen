@@ -4,7 +4,8 @@
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
   "main": "index.js",
   "scripts": {
-    "build": "webpack && chmod +x dist/bundle.js"
+    "build": "webpack",
+    "coverage": "jest --coverage && coveralls < coverage/lcov.info"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/Lokicoule/commandify#readme",
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "coveralls": "^3.1.1",
     "jest": "^29.5.0",
     "release-it": "^15.9.3",
     "ts-jest": "^29.0.5",
@@ -39,9 +41,8 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/modules/**/*.(t|j)s",
-      "!**/index.(t|j)s",
-      "!**/types.(t|j)s"
+      "**/**/*.(t|j)s",
+      "!**/index.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
