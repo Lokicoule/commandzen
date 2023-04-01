@@ -2,7 +2,7 @@
   "name": "commandify",
   "version": "0.0.1",
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
-  "main": "index.js",
+  "main": "lib/index.ts",
   "scripts": {
     "build": "webpack",
     "coverage": "jest --coverage && coveralls < coverage/lcov.info",
@@ -37,7 +37,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": "tests",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

@@ -1,20 +1,20 @@
-import { OptionParser } from "./OptionParser";
-import { OptionConfig } from "../config/OptionConfig";
+import { Argument, Option } from "../../lib";
+import { OptionParser } from "../../lib/option/OptionParser";
 
 describe("OptionParser", () => {
   describe("parse", () => {
-    let option: OptionConfig;
+    let option: Option;
     let args: string[];
     let index: number;
 
     beforeEach(() => {
-      option = new OptionConfig({ shortName: "-f", longName: "--file" });
+      option = new Option({ shortName: "-f", longName: "--file" });
       args = ["-f", "file.txt"];
       index = 0;
     });
 
     it("should parse a boolean option", () => {
-      option = new OptionConfig({ shortName: "-v", longName: "--verbose" });
+      option = new Option({ shortName: "-v", longName: "--verbose" });
       args = ["-v"];
       index = 0;
 
@@ -24,10 +24,10 @@ describe("OptionParser", () => {
     });
 
     it("should parse a string option", () => {
-      option = new OptionConfig({
+      option = new Option({
         shortName: "-f",
         longName: "--file",
-        argument: { type: "string" },
+        argument: Argument.create({ type: "string" }),
       });
 
       const result = OptionParser.parse(option, args, index);
@@ -36,10 +36,10 @@ describe("OptionParser", () => {
     });
 
     it("should parse a number option", () => {
-      option = new OptionConfig({
+      option = new Option({
         shortName: "-n",
         longName: "--number",
-        argument: { type: "number" },
+        argument: Argument.create({ type: "number" }),
       });
       args = ["-n", "42"];
 
@@ -49,11 +49,11 @@ describe("OptionParser", () => {
     });
 
     it("should parse a boolean option", () => {
-      option = new OptionConfig({
+      option = new Option({
         shortName: "-b",
 
         longName: "--boolean",
-        argument: { type: "boolean" },
+        argument: Argument.create({ type: "boolean" }),
       });
       args = ["-b", "true"];
 
@@ -63,7 +63,7 @@ describe("OptionParser", () => {
     });
 
     it("should throw an error for unknown type", () => {
-      option = new OptionConfig({
+      option = new Option({
         shortName: "-x",
         longName: "--unknown",
         argument: { type: "invalid" } as any,
@@ -75,10 +75,10 @@ describe("OptionParser", () => {
     });
 
     it("should throw an error for missing argument", () => {
-      option = new OptionConfig({
+      option = new Option({
         shortName: "-f",
         longName: "--file",
-        argument: { type: "string", required: true },
+        argument: Argument.create({ type: "string", required: true }),
       });
       args = ["-f"];
 

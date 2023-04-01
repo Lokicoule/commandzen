@@ -1,9 +1,9 @@
-import { ArgumentValue } from "src/config/ArgumentConfig";
-import { OptionConfig } from "src/config/OptionConfig";
+import { ArgumentValue } from "../argument/Argument";
+import { Option } from "./Option";
 
 export class OptionParser {
   static parse(
-    option: OptionConfig,
+    option: Option,
     args: string[],
     index: number
   ): { value: ArgumentValue; index: number } {
@@ -30,7 +30,7 @@ export class OptionParser {
       case "number":
         return Number(value);
       case "boolean":
-        return Boolean(value);
+        return value?.toLowerCase() !== "false";
       default:
         throw new Error(`Unknown type: ${type}`);
     }

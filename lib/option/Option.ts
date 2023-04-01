@@ -1,14 +1,18 @@
-import { ArgumentConfig } from "./ArgumentConfig";
+import { Argument } from "../argument/Argument";
 
-export type OptionConfigProperties = {
+export type OptionProperties = {
   shortName: string;
   longName?: string;
   description?: string;
-  argument?: ArgumentConfig;
+  argument?: Argument;
 };
 
-export class OptionConfig {
-  constructor(private readonly properties: OptionConfigProperties) {}
+export class Option {
+  constructor(private readonly properties: OptionProperties) {}
+
+  public static create(properties: OptionProperties): Option {
+    return new Option(properties);
+  }
 
   public get shortName(): string {
     return this.properties.shortName;
@@ -22,8 +26,12 @@ export class OptionConfig {
     return this.properties.description;
   }
 
-  public get argument(): ArgumentConfig | undefined {
+  public get argument(): Argument | undefined {
     return this.properties.argument;
+  }
+
+  public set argument(argument: Argument | undefined) {
+    this.properties.argument = argument;
   }
 
   public getKey(): string {

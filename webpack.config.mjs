@@ -2,7 +2,7 @@ import path from "path";
 
 export default {
   mode: "production",
-  entry: "./src/index.ts",
+  entry: "./lib/index.ts",
   output: {
     filename: "bundle.js",
     path: path.resolve(process.cwd(), "dist"),
@@ -10,7 +10,7 @@ export default {
     libraryTarget: "commonjs",
   },
   resolve: {
-    extensions: [".ts", ".js"],
+    extensions: [".ts"],
   },
   module: {
     rules: [
