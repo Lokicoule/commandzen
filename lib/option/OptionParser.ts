@@ -14,7 +14,7 @@ export class OptionParser {
       if (option.argument.required && nextArg === undefined) {
         throw new Error(`Missing argument for option ${option.longName}`);
       }
-      value = this.parseValue(option.argument.type, nextArg);
+      value = this.parseValue(option, nextArg);
       index++;
     } else {
       value = true;
@@ -23,16 +23,18 @@ export class OptionParser {
     return { value, index };
   }
 
-  private static parseValue(type: string, value: string): ArgumentValue {
-    switch (type) {
+  private static parseValue(option: Option, value: string): ArgumentValue {
+    switch (option.argument?.type) {
       case "string":
         return value;
       case "number":
-        return Number(value);
+        return !isNaN(Number(value))
+          ? Number(value)
+          : option.argument.defaultValue ?? 0;
       case "boolean":
         return value?.toLowerCase() !== "false";
       default:
-        throw new Error(`Unknown type: ${type}`);
+        throw new Error(`Unknown type: ${option.argument?.type}`);
     }
   }
 }

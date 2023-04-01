@@ -5,6 +5,7 @@
   "main": "lib/index.ts",
   "scripts": {
     "build": "webpack",
+    "test": "jest",
     "coverage": "jest --coverage && coveralls < coverage/lcov.info",
     "release": "webpack && release-it"
   },
