@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "coverage": "jest --coverage && coveralls < coverage/lcov.info"
+    "coverage": "jest --coverage && coveralls < coverage/lcov.info",
+    "release": "webpack && release-it"
   },
   "repository": {
     "type": "git",
