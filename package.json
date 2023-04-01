@@ -1,27 +1,35 @@
 {
-  "name": "commandify",
-  "version": "0.0.1",
+  "name": "commandzen",
+  "version": "0.0.7",
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
-  "main": "lib/index.ts",
-  "scripts": {
-    "build": "webpack",
-    "test": "jest",
-    "coverage": "jest --coverage && coveralls < coverage/lcov.info",
-    "release": "webpack && release-it"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Lokicoule/commandify.git"
-  },
   "keywords": [
     "cli"
   ],
   "author": "Loik F.",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Lokicoule/commandify/issues"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lokicoule/commandzen.git"
   },
-  "homepage": "https://github.com/Lokicoule/commandify#readme",
+  "bugs": {
+    "url": "https://github.com/Lokicoule/commandzen/issues"
+  },
+  "homepage": "https://github.com/Lokicoule/commandzen#readme",
+  "type": "module",
+  "main": "dist/umd/index.js",
+  "module": "dist/umd/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/umd",
+    "dist/types"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist/ && rm -rf coverage/",
+    "test": "jest",
+    "coverage": "jest --coverage && coveralls < coverage/lcov.info",
+    "release": "npm run build && release-it"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "coveralls": "^3.1.1",
@@ -29,10 +37,9 @@
     "release-it": "^15.9.3",
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.3",
+    "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1"
-  },
-  "dependencies": {
-    "webpack": "^5.77.0"
   }
 }

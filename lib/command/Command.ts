@@ -1,4 +1,5 @@
 import { Option } from "../option/Option";
+import { ParsedOptions } from "./CommandParser";
 
 export type CommandProperties = {
   name: string;
@@ -25,7 +26,7 @@ export class Command {
     return this;
   }
 
-  public execute(options: Record<string, any>): void {
+  public execute(options: ParsedOptions): void {
     if (this.action) {
       this.action(options);
     }

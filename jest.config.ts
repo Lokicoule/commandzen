@@ -1,4 +1,7 @@
-module.exports = {
+import type { Config } from "jest";
+
+const config: Config = {
+  verbose: true,
   testEnvironment: "node",
   testMatch: ["**/tests/**/*.ts?(x)"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
@@ -13,3 +16,5 @@ module.exports = {
   coverageReporters: ["text", "lcov"],
   coveragePathIgnorePatterns: ["/node_modules/", "/dist/"],
 };
+
+export default config;

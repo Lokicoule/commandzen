@@ -1,9 +1,15 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "UMD",
+    "outDir": "dist/umd",
+    "declaration": true,
+    "declarationDir": "dist/types"
+  },
   "include": ["lib/**/*"],
   "exclude": [
     "node_modules",
-    "test",
+    "tests",
     "dist",
     "**/*.spec.ts",
     "coverage",
