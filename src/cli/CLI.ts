@@ -1,5 +1,6 @@
-import { ArgumentParser } from "./parsers/ArgumentParser";
-import { CommandConfig, OptionConfig } from "./types";
+import { ArgumentParser } from "../argument/ArgumentParser";
+import { CommandConfig } from "../config/CommandConfig";
+import { OptionConfig } from "../config/OptionConfig";
 
 /**
  * @class CLI
@@ -14,10 +15,9 @@ export class CLI {
 
   constructor() {
     this.commands = new Map<string, CommandConfig>();
-    this.defaultCommand = {
+    this.defaultCommand = new CommandConfig({
       name: "default",
-      options: [],
-    };
+    });
     this.parser = new ArgumentParser(this.commands, this.defaultCommand);
   }
 
@@ -49,6 +49,7 @@ export class CLI {
     console.log("Available commands:");
     this.commands.forEach((commandConfig) => {
       console.log(`  ${commandConfig.name}`);
+      console.log(`    ${commandConfig.description}`);
       if (commandConfig.options) {
         console.log("    Options:");
         commandConfig.options.forEach((optionConfig) => {
@@ -58,6 +59,7 @@ export class CLI {
             optionConfig.argument?.required
               ? `<${optionConfig.argument.type}>`
               : `[${optionConfig.argument?.type}]`,
+            optionConfig.description,
           ]
             .filter(Boolean)
             .join(", ");

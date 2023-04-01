@@ -1,3 +1,2 @@
-export * from "./CLI";
-export * from "./commandify/Commandify";
-export * from "./types";
+export * from "./cli/CLI";
+export * from "./cli/Command";

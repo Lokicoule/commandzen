@@ -1,16 +1,17 @@
-import { CLI } from "../CLI";
-import { CommandConfig, OptionConfig } from "../types";
+import { CommandConfig } from "src/config/CommandConfig";
+import { OptionConfig } from "src/config/OptionConfig";
+import { CLI } from "./CLI";
 
 /**
- * @class Commandify
+ * @class Command
  * @description
- * The Commandify class is used to register commands and options and parse the command line arguments.
+ * The Command class is used to register commands and options and parse the command line arguments.
  * It is a wrapper around the CLI class.
  * It is recommended to use this class instead of the CLI class.
  * The CLI class is exported for advanced use cases.
- * The Commandify class is used to register commands and options and parse the command line arguments.
+ * The Command class is used to register commands and options and parse the command line arguments.
  */
-export class Commandify {
+export class Command {
   private cli: CLI;
 
   constructor() {
@@ -25,8 +26,7 @@ export class Commandify {
     this.cli.registerDefaultOptions(options);
   }
 
-  public parse(): Map<string, any> {
-    const args = process.argv.slice(2);
+  public parse(args: string[] = process.argv.slice(2)): Map<string, any> {
     return this.cli.parse(args);
   }
 }
