@@ -50,4 +50,18 @@ describe("Option", () => {
       expect(option.getKey()).toBe("f");
     });
   });
+
+  describe("argument", () => {
+    it("should return the argument", () => {
+      const argument = Argument.create({ type: "string" });
+      const option = Option.create({
+        shortName: "-f",
+        longName: "--file",
+      });
+
+      option.argument = argument;
+
+      expect(option.argument).toBe(argument);
+    });
+  });
 });
