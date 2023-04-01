@@ -1,12 +1,12 @@
+import { ArgumentValue } from "../argument/Argument";
 import { OptionParser } from "../option/OptionParser";
 import { Command } from "./Command";
 
+export type ParsedOptions = Record<string, ArgumentValue>;
+
 export class CommandParser {
-  public static parseOptions(
-    command: Command,
-    args: string[]
-  ): Record<string, any> {
-    const options: Record<string, any> = {};
+  public static parseOptions(command: Command, args: string[]): ParsedOptions {
+    const options: ParsedOptions = {};
 
     let i = 0;
     while (i < args.length) {
@@ -31,7 +31,7 @@ export class CommandParser {
 
   public static validateOptions(
     command: Command,
-    options: Record<string, any>
+    options: ParsedOptions
   ): void {
     const optionKeys = command.options.map((option) => option.getKey());
     for (const key in options) {
