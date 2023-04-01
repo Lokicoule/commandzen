@@ -72,4 +72,27 @@ describe("ArgumentParser", () => {
       );
     });
   });
+
+  describe("getCommand", () => {
+    it("should return the command config for a known command", () => {
+      const commandConfig = new CommandConfig({ name: "my-command" });
+      commands.set("my-command", commandConfig);
+
+      const result = argumentParser.getCommand("my-command");
+
+      expect(result).toEqual(commandConfig);
+    });
+
+    it("should return the default command config for an unknown command", () => {
+      const result = argumentParser.getCommand("-unknown-command");
+
+      expect(result).toEqual(defaultCommand);
+    });
+
+    it("should return the default command config for an option", () => {
+      const result = argumentParser.getCommand("-v");
+
+      expect(result).toEqual(defaultCommand);
+    });
+  });
 });

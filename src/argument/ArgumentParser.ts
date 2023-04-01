@@ -43,7 +43,7 @@ export class ArgumentParser {
     return result;
   }
 
-  private getCommand(arg: string): CommandConfig | undefined {
+  public getCommand(arg: string): CommandConfig | undefined {
     return (
       this.commands.get(arg) ||
       (arg.startsWith("-") ? this.defaultCommand : undefined)
