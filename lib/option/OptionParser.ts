@@ -23,7 +23,7 @@ export class OptionParser {
     return { value, index };
   }
 
-  private static parseValue(option: Option, value: string): ArgumentValue {
+  public static parseValue(option: Option, value: string): ArgumentValue {
     switch (option.argument?.type) {
       case "string":
         return value;
