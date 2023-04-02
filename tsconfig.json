@@ -1,10 +1,11 @@
 {
   "extends": "./tsconfig.paths.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "strict": true,
-    "target": "ES2022",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "moduleResolution": "Node",
     "module": "ESNext",
-    "moduleResolution": "node"
+    "target": "ESNext"
   }
 }

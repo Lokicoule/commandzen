@@ -1,6 +1,6 @@
 {
   "name": "commandzen",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
   "keywords": [
     "cli"
@@ -15,16 +15,18 @@
     "url": "https://github.com/Lokicoule/commandzen/issues"
   },
   "homepage": "https://github.com/Lokicoule/commandzen#readme",
-  "type": "module",
-  "main": "dist/umd/index.js",
-  "module": "dist/umd/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
-    "dist/umd",
+    "dist/cjs",
+    "dist/esm",
     "dist/types"
   ],
   "scripts": {
-    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build:esm": "tsc -p tsconfig.build.esm.json",
+    "build:cjs": "tsc -p tsconfig.build.cjs.json",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "clean": "rm -rf dist/ && rm -rf coverage/",
     "test": "jest",
     "coverage": "jest --coverage && coveralls < coverage/lcov.info",

@@ -1,8 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "UMD",
-    "outDir": "dist/umd",
     "declaration": true,
     "declarationDir": "dist/types"
   },
@@ -15,5 +13,9 @@
     "coverage",
     ".github",
     ".vscode"
+  ],
+  "references": [
+    { "path": "./tsconfig.build.cjs.json" },
+    { "path": "./tsconfig.build.esm.json" }
   ]
 }
