@@ -1,6 +1,6 @@
 {
   "name": "commandzen",
-  "version": "0.0.9",
+  "version": "0.0.0",
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
   "keywords": [
     "cli"
