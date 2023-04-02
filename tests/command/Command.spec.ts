@@ -1,4 +1,4 @@
-import { Argument, Command, Option } from "../../lib";
+import { Argument, Command, Option, ParsedOptions } from "../../lib";
 
 describe("Command", () => {
   describe("constructor", () => {
@@ -100,17 +100,43 @@ describe("Command", () => {
   });
 
   describe("execute", () => {
-    it("should call the command's action with the given options", () => {
-      const command = new Command({
-        name: "test",
-        action: jest.fn(),
+    describe("execute", () => {
+      it("should execute a synchronous action", () => {
+        let actionExecuted = false;
+        const syncAction = (options: ParsedOptions) => {
+          actionExecuted = true;
+        };
+
+        const command = new Command({
+          name: "sync",
+          action: syncAction,
+        });
+
+        command.execute({});
+
+        expect(actionExecuted).toBe(true);
       });
 
-      const options = { file: "input.txt" };
+      it("should execute an asynchronous action", async () => {
+        let actionExecuted = false;
+        const asyncAction = async (options: ParsedOptions) => {
+          return new Promise<void>((resolve) => {
+            setTimeout(() => {
+              actionExecuted = true;
+              resolve();
+            }, 100);
+          });
+        };
 
-      command.execute(options);
+        const command = new Command({
+          name: "async",
+          action: asyncAction,
+        });
 
-      expect(command.action).toHaveBeenCalledWith(options);
+        await command.execute({});
+
+        expect(actionExecuted).toBe(true);
+      });
     });
   });
 
@@ -175,6 +201,24 @@ describe("Command", () => {
       expect(help).toEqual(
         "test\n  Test command\n  Options:\n    -f, --file <string>, Specify the input file\n    -v, --verbose, Enable verbose logging\n"
       );
+    });
+  });
+
+  describe("action", () => {
+    it("should return the action function", () => {
+      const action = () => {};
+      const command = new Command({ name: "test", action });
+
+      expect(command.action).toBe(action);
+    });
+
+    it("should set the action function", () => {
+      const command = new Command({ name: "test" });
+      const action = () => {};
+
+      command.action = action;
+
+      expect(command.action).toBe(action);
     });
   });
 });

@@ -6,7 +6,7 @@ export type CommandProperties = {
   description?: string;
   aliases?: string[];
   options?: Option[];
-  action?: (options: Record<string, any>) => void;
+  action?: (options: Record<string, any>) => void | Promise<void>;
 };
 
 export class Command {
@@ -26,9 +26,12 @@ export class Command {
     return this;
   }
 
-  public execute(options: ParsedOptions): void {
+  public async execute(options: ParsedOptions): Promise<void> {
     if (this.action) {
-      this.action(options);
+      const result = this.action(options);
+      if (result instanceof Promise) {
+        await result;
+      }
     }
   }
 
@@ -44,8 +47,16 @@ export class Command {
     return this.properties.aliases;
   }
 
-  public get action(): ((options: Record<string, any>) => void) | undefined {
+  public get action():
+    | ((options: Record<string, any>) => void | Promise<void>)
+    | undefined {
     return this.properties.action;
+  }
+
+  public set action(
+    action: ((options: Record<string, any>) => void | Promise<void>) | undefined
+  ) {
+    this.properties.action = action;
   }
 
   public get options(): Option[] {
