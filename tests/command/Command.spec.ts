@@ -28,6 +28,46 @@ describe("Command", () => {
     });
   });
 
+  describe("option", () => {
+    it("should override the options with new options", () => {
+      const command = new Command({
+        name: "test",
+        options: [
+          new Option({
+            shortName: "-f",
+            longName: "--file",
+            description: "Specify the input file",
+          }),
+        ],
+      });
+      const overrideOption = new Option({
+        shortName: "-o",
+        longName: "--override",
+        description: "Override the last option",
+      });
+      command.options = [overrideOption];
+
+      expect(command.options).toEqual([overrideOption]);
+    });
+
+    it("should clear the options if the new options are undefined", () => {
+      const command = new Command({
+        name: "test",
+        options: [
+          new Option({
+            shortName: "-f",
+            longName: "--file",
+            description: "Specify the input file",
+          }),
+        ],
+      });
+
+      command.options = undefined;
+
+      expect(command.options).toEqual([]);
+    });
+  });
+
   describe("addOption", () => {
     it("should add an option to the command's options", () => {
       const command = new Command({ name: "test" });

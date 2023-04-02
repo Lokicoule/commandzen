@@ -34,6 +34,17 @@ describe("CommandParser", () => {
 
       expect(CommandParser.parseOptions(command, args)).toEqual(expected);
     });
+
+    test("parseOptions should increment when argument does not start with dash", () => {
+      const args = ["-s", "testValue", "non-option-argument", "-n", "42"];
+
+      const expected = {
+        number: 42,
+        string: "testValue",
+      };
+
+      expect(CommandParser.parseOptions(command, args)).toEqual(expected);
+    });
   });
 
   describe("validateOptions", () => {
