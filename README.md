@@ -1,6 +1,6 @@
 # CommandZen
 
-[![Coverage Status](https://coveralls.io/repos/github/Lokicoule/commandzen/badge.svg?branch=main)](https://coveralls.io/github/Lokicoule/commandzen?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/Lokicoule/commandzen/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/Lokicoule/commandzen?branch=main)
 
 The CommandZen Library is a TypeScript library designed to help you create command-line interface (CLI) applications with ease. With a clean and intuitive API, you can register commands, options, and arguments, handle input validation, and execute actions based on user input.
 
