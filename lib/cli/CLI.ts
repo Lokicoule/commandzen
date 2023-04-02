@@ -26,6 +26,10 @@ export class CLI {
     }
   }
 
+  public registerDefaultCommand(command: Command): void {
+    this.defaultCommand = command;
+  }
+
   public parse(args: string[]): void {
     let commandName = args[0];
     let command: Command | undefined;

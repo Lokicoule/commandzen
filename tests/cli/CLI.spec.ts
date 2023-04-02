@@ -142,4 +142,25 @@ describe("CLI", () => {
     expect(mockExecute).toHaveBeenCalledWith({ value: 42 });
     expect(customMockExecute).not.toHaveBeenCalled();
   });
+
+  test("should add a default command", () => {
+    const command = new Command({
+      name: "default",
+      options: [
+        new Option({
+          longName: "--value",
+          shortName: "-v",
+          argument: Argument.create({ type: "number" }),
+        }),
+      ],
+    });
+
+    const mockExecute = jest.fn();
+    command.execute = mockExecute;
+
+    cli.registerDefaultCommand(command);
+    cli.parse(["-v", "42"]);
+
+    expect(mockExecute).toHaveBeenCalledWith({ value: 42 });
+  });
 });
