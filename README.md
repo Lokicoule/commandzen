@@ -119,6 +119,7 @@ cli.displayHelp();
 - `registerDefaultOptions(options: Option[])`: Register default options for the CLI.
 - `registerCommand(command: Command)`: Register a command.
 - `registerDefaultCommand(command: Command)`: Register a default command to be executed when no command is provided.
+- `registerHelpCommand()`: Register the help command as subcommand.
 - `parse(args: string[])`: Parse command-line arguments and execute the appropriate command.
 - `displayHelp()`: Display help messages for all registered commands.
 - `getHelp()`: Get help messages for all registered commands as a string.
@@ -281,6 +282,7 @@ const defaultCommand = Command.create({
 });
 
 cli.registerDefaultCommand(defaultCommand);
+cli.registerHelpCommand();
 ```
 
 ### Subcommands
@@ -320,6 +322,7 @@ parentCommand.addOption(
   Option.create({ shortName: "-s", longName: "--subcommand" })
 );
 cli.registerCommand(parentCommand);
+cli.registerHelpCommand();
 
 cli.parse(process.argv.slice(2));
 
