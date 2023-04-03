@@ -334,6 +334,22 @@ if (subcommand === "subA") {
 }
 ```
 
+### Help Command
+
+By calling `registerHelpCommand()`, the CLI instance will create a subcommand named help that will display the usage help message. This subcommand can be called by running `my-cli help`.
+
+However, it's important to note that `registerHelpCommand()` should be called after registering the default command, if one is used. This is because when you override the default command, you "lose" its options, which can render the help message unreachable.
+
+```ts
+import { CLI } from "commandzen";
+
+const cli = new CLI();
+
+cli.registerDefaultCommand(myDefaultCommand);
+cli.registerHelpCommand();
+cli.parse(process.argv.slice(2));
+```
+
 ### Customizing Help Messages
 
 You can customize the help messages by extending the Command class and overriding the `getHelp()` method.

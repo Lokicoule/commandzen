@@ -5,6 +5,7 @@
   "keywords": [
     "commandzen",
     "command",
+    "subcommand",
     "cli",
     "option",
     "argument",
