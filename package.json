@@ -3,7 +3,14 @@
   "version": "0.2.0",
   "description": "A command-line argument parsing library that allows for quick and easy parsing of command-line arguments.",
   "keywords": [
-    "cli"
+    "commandzen",
+    "command",
+    "cli",
+    "option",
+    "argument",
+    "parser",
+    "args",
+    "argv"
   ],
   "author": "Loik F.",
   "license": "MIT",
