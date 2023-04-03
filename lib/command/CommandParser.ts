@@ -5,7 +5,10 @@ import { Command } from "./Command";
 export type ParsedOptions = Record<string, ArgumentValue>;
 
 export class CommandParser {
-  public static parseOptions(command: Command, args: string[]): ParsedOptions {
+  public static parseOptions<T = ParsedOptions>(
+    command: Command<T>,
+    args: string[]
+  ): ParsedOptions {
     const options: ParsedOptions = {};
 
     let i = 0;
@@ -29,8 +32,8 @@ export class CommandParser {
     return options;
   }
 
-  public static validateOptions(
-    command: Command,
+  public static validateOptions<T = ParsedOptions>(
+    command: Command<T>,
     options: ParsedOptions
   ): void {
     const optionKeys = command.options.map((option) => option.getKey());

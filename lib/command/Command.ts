@@ -1,32 +1,34 @@
 import { Option } from "../option/Option";
 import { ParsedOptions } from "./CommandParser";
 
-export type CommandProperties = {
+export type CommandProperties<T = ParsedOptions> = {
   name: string;
   description?: string;
   aliases?: string[];
   options?: Option[];
-  action?: (options: Record<string, any>) => void | Promise<void>;
+  action?: (options: T) => void | Promise<void>;
 };
 
-export class Command {
-  constructor(private readonly properties: CommandProperties) {}
+export class Command<T = ParsedOptions> {
+  constructor(private readonly properties: CommandProperties<T>) {}
 
-  public static create(properties: CommandProperties): Command {
-    return new Command(properties);
+  public static create<T = ParsedOptions>(
+    properties: CommandProperties<T>
+  ): Command<T> {
+    return new Command<T>(properties);
   }
 
-  public addOption(option: Option): Command {
+  public addOption(option: Option): Command<T> {
     if (!this.properties.options) {
       this.properties.options = [];
     }
 
     this.properties.options.push(option);
 
-    return this;
+    return this as Command<T>;
   }
 
-  public async execute(options: ParsedOptions): Promise<void> {
+  public async execute(options: T): Promise<void> {
     if (this.action) {
       const result = this.action(options);
       if (result instanceof Promise) {
@@ -47,14 +49,12 @@ export class Command {
     return this.properties.aliases;
   }
 
-  public get action():
-    | ((options: Record<string, any>) => void | Promise<void>)
-    | undefined {
+  public get action(): ((options: T) => void | Promise<void>) | undefined {
     return this.properties.action;
   }
 
   public set action(
-    action: ((options: Record<string, any>) => void | Promise<void>) | undefined
+    action: ((options: T) => void | Promise<void>) | undefined
   ) {
     this.properties.action = action;
   }

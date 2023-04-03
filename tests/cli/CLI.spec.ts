@@ -163,4 +163,21 @@ describe("CLI", () => {
 
     expect(mockExecute).toHaveBeenCalledWith({ value: 42 });
   });
+
+  test("should register a help command", () => {
+    cli.registerHelpCommand();
+    const command = cli["commands"].get("help");
+    expect(command).toBeDefined();
+    expect(command?.name).toEqual("help");
+    expect(command?.description).toEqual("Display help");
+    expect(typeof command?.action).toEqual("function");
+  });
+
+  test("should display help when help command is executed", () => {
+    const consoleSpy = jest.spyOn(console, "info").mockImplementation(() => {});
+    cli.registerHelpCommand();
+    cli.parse(["help"]);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
 });

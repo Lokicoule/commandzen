@@ -2,10 +2,9 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/Lokicoule/commandzen/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/Lokicoule/commandzen?branch=main)
 
-The CommandZen Library is a TypeScript library designed to help you create command-line interface (CLI) applications with ease. With a clean and intuitive API, you can register commands, options, and arguments, handle input validation, and execute actions based on user input.
-
 ## Table of Contents
 
+- [Introduction](#introduction)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -25,6 +24,10 @@ The CommandZen Library is a TypeScript library designed to help you create comma
   - [Customizing Help Messages](#customizing-help-messages)
 - [Contribution](#contribution)
 - [License](#license)
+
+## Introduction
+
+The CommandZen Library is a TypeScript library designed to help you create command-line interface (CLI) applications with ease. With a clean and intuitive API, you can register commands, options, and arguments, handle input validation, and execute actions based on user input.
 
 ## Features
 
@@ -255,7 +258,7 @@ On the other hand, using the registerDefaultOptions method can be beneficial whe
 
 ### Default command
 
-The registerDefaultCommand(command: Command) method allows you to replace the built-in default command with a custom one. The default command is executed when no specific command is provided by the user. This is useful when you want to provide a default behavior for your CLI application without requiring the user to specify a command.
+The `registerDefaultCommand(command: Command)` method allows you to replace the built-in default command with a custom one. The default command is executed when no specific command is provided by the user. This is useful when you want to provide a default behavior for your CLI application without requiring the user to specify a command.
 
 ```ts
 const defaultCommand = Command.create({
@@ -330,7 +333,7 @@ if (subcommand === "subA") {
 
 ### Customizing Help Messages
 
-You can customize the help messages by extending the Command class and overriding the getHelp() method.
+You can customize the help messages by extending the Command class and overriding the `getHelp()` method.
 
 ```ts
 class CustomCommand extends Command {

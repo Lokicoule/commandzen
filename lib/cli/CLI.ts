@@ -1,33 +1,52 @@
 import { Command } from "../command/Command";
-import { CommandParser } from "../command/CommandParser";
+import { CommandParser, ParsedOptions } from "../command/CommandParser";
 import { Option } from "../option/Option";
 
 export class CLI {
-  private commands: Map<string, Command>;
-  private defaultCommand: Command;
+  private commands: Map<string, Command<unknown>>;
+  private defaultCommand: Command<unknown>;
 
   constructor() {
-    this.commands = new Map<string, Command>();
+    this.commands = new Map<string, Command<unknown>>();
     this.defaultCommand = new Command({
       name: "default",
     });
   }
 
-  public registerDefaultOptions(options: Option[]): void {
+  public registerDefaultOptions(options: Option[]): CLI {
     this.defaultCommand.options = options;
+
+    return this;
   }
 
-  public registerCommand(command: Command): void {
+  public registerCommand<T = ParsedOptions>(command: Command<T>): CLI {
     this.commands.set(command.name, command);
     if (command.aliases) {
       command.aliases.forEach((alias) => {
         this.commands.set(alias, command);
       });
     }
+
+    return this;
   }
 
-  public registerDefaultCommand(command: Command): void {
+  public registerDefaultCommand<T = ParsedOptions>(command: Command<T>): CLI {
     this.defaultCommand = command;
+    return this;
+  }
+
+  public registerHelpCommand(): CLI {
+    const helpCommand = new Command({
+      name: "help",
+      description: "Display help",
+      action: () => {
+        this.displayHelp();
+      },
+    });
+
+    this.registerCommand(helpCommand);
+
+    return this;
   }
 
   public parse(args: string[]): void {
