@@ -183,5 +183,13 @@ describe("Option", () => {
       });
       expect(option.defaultValue).toBe(42);
     });
+
+    test("should handle short name with dash", () => {
+      const option = new Option({
+        flag: "-f, --foo-bar",
+        description: "foo option",
+      });
+      expect(option.key).toBe("fooBar");
+    });
   });
 });
