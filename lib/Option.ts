@@ -27,7 +27,7 @@ type OptionState = OptionProps & PrivateOptionProps;
  * Represents a command line option.
  */
 export class Option {
-  private readonly state: OptionState;
+  private state: OptionState;
 
   constructor({ flag, description, defaultValue }: OptionProps) {
     this.state = {
@@ -131,31 +131,30 @@ export class Option {
     const flagPattern = /(-\w+)|(--[\w-]+)/g;
     const flagMatches = [...this.flag.matchAll(flagPattern)];
 
-    flagMatches.forEach(([_, shortName, longName]) => {
-      if (shortName) {
-        this.state.shortName = shortName;
-      } else if (longName) {
-        this.state.longName = longName;
-      }
-    });
+    const { shortName, longName } = flagMatches.reduce(
+      (acc, [, short, long]) => ({
+        shortName: short ? short : acc.shortName,
+        longName: long ? long : acc.longName,
+      }),
+      { shortName: "", longName: "" }
+    );
 
     const keyPattern = /<(\w+)>|\[(\w+)\]/;
     const keyMatch = this.flag.match(keyPattern);
 
-    if (keyMatch) {
-      const [, requiredKey] = keyMatch;
-      this.state.required = !!requiredKey;
-    }
-    if (this.state.longName) {
-      const longKey = this.state.longName.replace(/^--/, "").replace(/-/g, " ");
-      this.state.key = longKey
-        .split(" ")
-        .map((word, i) =>
-          i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
-        )
-        .join("");
-    } else if (this.state.shortName) {
-      this.state.key = this.state.shortName.replace(/^-/, "");
-    }
+    const required = keyMatch ? !!keyMatch[1] : false;
+
+    const key = longName
+      ? longName
+          .replace(/^--/, "")
+          .replace(/-/g, " ")
+          .split(" ")
+          .map((word, i) =>
+            i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+          )
+          .join("")
+      : shortName.replace(/^-/, "");
+
+    this.state = { ...this.state, shortName, longName, required, key };
   }
 }

@@ -21,9 +21,20 @@ describe("Option", () => {
         flag: "--long-option",
         description: "An example option.",
       });
-      expect(option.shortName).toBeUndefined();
+      expect(option.shortName).toEqual("");
       expect(option.longName).toEqual("--long-option");
       expect(option.key).toEqual("longOption");
+    });
+
+    it("should handle options without a long name", () => {
+      const option = new Option({
+        flag: "-s",
+        description: "An example option.",
+      });
+
+      expect(option.shortName).toEqual("-s");
+      expect(option.longName).toEqual("");
+      expect(option.key).toEqual("s");
     });
 
     it("should handle required options", () => {
