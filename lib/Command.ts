@@ -20,6 +20,18 @@ type CommandState = CommandProps & {
 };
 
 /**
+ * @type ActionProps
+ * @description
+ * Represents the properties of an action.
+ * @property {string[]} args
+ * @property {object} options
+ */
+export type ActionProps<T> = {
+  args: string[];
+  options: T;
+};
+
+/**
  * @class Command
  * @description Represents a command
  * @extends EventEmitter
@@ -72,6 +84,12 @@ export class Command extends EventEmitter {
     return this;
   }
 
+  /**
+   * @method addAlias
+   * @param {string} aliases
+   * @returns {Command}
+   * @description Adds an alias to the command
+   */
   public addAlias(...aliases: string[]): Command {
     this.state.aliases.push(...aliases);
     return this;
@@ -129,7 +147,7 @@ export class Command extends EventEmitter {
    * @returns {Command}
    * @description Registers an action for the command
    */
-  public registerAction(callback: (argv: any) => void): Command {
+  public registerAction<T>(callback: (props: ActionProps<T>) => void): Command {
     this.on(this.name, callback);
     return this;
   }

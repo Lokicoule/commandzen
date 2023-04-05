@@ -1,12 +1,8 @@
-import { Command, CommandProps } from "./Command";
+import { ActionProps, Command, CommandProps } from "./Command";
 import { Option, OptionProps } from "./Option";
 
-type ParsedArgv = {
-  command: string | null;
-  args: string[];
-  options: {
-    [key: string]: string | boolean;
-  };
+type ParsedArgv = ActionProps<{ help?: boolean }> & {
+  command: string;
 };
 
 export class CliBuilder {
@@ -60,6 +56,22 @@ export class CliBuilder {
     this.defaultCommand = command;
     this.addHelpToDefaultCommand();
     return this;
+  }
+
+  /**
+   * @method addHelpToDefaultCommand
+   * @returns {void}
+   * @description
+   * Adds the help command and option to the default command.
+   * This is called when the default command is set or when a command is added.
+   */
+  private addHelpToDefaultCommand(): void {
+    this.defaultCommand.addOption(
+      new Option({
+        flag: "-h, --help",
+        description: "Display help information",
+      })
+    );
   }
 
   /**
@@ -139,21 +151,5 @@ export class CliBuilder {
     }
 
     return { command, args, options };
-  }
-
-  /**
-   * @method addHelpToDefaultCommand
-   * @returns {void}
-   * @description
-   * Adds the help command and option to the default command.
-   * This is called when the default command is set or when a command is added.
-   */
-  private addHelpToDefaultCommand(): void {
-    this.defaultCommand.addOption(
-      new Option({
-        flag: "-h, --help",
-        description: "Display help information",
-      })
-    );
   }
 }
