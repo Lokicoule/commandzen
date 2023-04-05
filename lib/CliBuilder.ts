@@ -109,32 +109,35 @@ export class CliBuilder {
    * Parses the arguments and returns an object with the command, arguments and options.
    */
   private parseArgv(argv: string[]): ParsedArgv {
-    let command: string | null = null;
-    const args: string[] = [];
-    const options: {
-      [key: string]: string | boolean;
-    } = {};
+    const initialResult = {
+      command: this.defaultCommand.name,
+      args: new Array<string>(),
+      options: {} as Record<string, string | boolean>,
+      optionExpected: false,
+      commandProcessed: false,
+    };
 
-    for (let i = 0; i < argv.length; i++) {
-      const arg = argv[i];
-
-      if (i === 0 && !arg.startsWith("-")) {
-        command = arg;
+    const { command, args, options } = argv.reduce((acc, arg, i, arr) => {
+      if (!acc.commandProcessed && !arg.startsWith("-")) {
+        acc.command = arg;
+        acc.commandProcessed = true;
       } else {
-        let option: Option | undefined = this.defaultCommand.findOption(arg);
+        let option = this.defaultCommand.findOption(arg);
 
-        if (command) {
-          const specificCommand = this.defaultCommand.subcommands.get(command);
+        if (acc.command) {
+          const specificCommand = this.defaultCommand.subcommands.get(
+            acc.command
+          );
           if (specificCommand) {
             option = option || specificCommand.findOption(arg);
           }
         }
 
         if (option) {
-          const nextArg = argv[i + 1];
+          const nextArg = arr[i + 1];
           if (nextArg && !nextArg.startsWith("-")) {
-            options[option.key] = nextArg;
-            i++;
+            acc.options[option.key] = nextArg;
+            acc.optionExpected = true;
           } else {
             if (option.required) {
               console.error(
@@ -142,13 +145,16 @@ export class CliBuilder {
               );
               process.exit(1);
             }
-            options[option.key] = true;
+            acc.options[option.key] = true;
           }
+        } else if (!acc.optionExpected) {
+          acc.args.push(arg);
         } else {
-          args.push(arg);
+          acc.optionExpected = false;
         }
       }
-    }
+      return acc;
+    }, initialResult);
 
     return { command, args, options };
   }
