@@ -26,6 +26,10 @@ export class Option {
     this.parseFlag();
   }
 
+  public static create(props: OptionProps): Option {
+    return new Option(props);
+  }
+
   get flag(): string {
     return this.state.flag;
   }

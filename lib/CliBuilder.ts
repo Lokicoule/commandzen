@@ -1,60 +1,49 @@
-import { EventEmitter } from "events";
-
-export class Command extends EventEmitter {
-  name: string;
-  description: string;
-  options: Option[];
-  commands: Command[];
-
-  constructor(name: string, description: string) {
-    super();
-    this.name = name;
-    this.description = description;
-    this.options = [];
-    this.commands = [];
-  }
-
-  addOption(option: Option): Command {
-    this.options.push(option);
-    return this;
-  }
-
-  addCommand(command: Command): Command {
-    this.commands.push(command);
-    return this;
-  }
-
-  parse(args: string[]): void {
-    // TODO: Implement
-  }
-}
-
-export class Option {
-  flag: string;
-  description: string;
-  required: boolean;
-
-  constructor(flag: string, description: string, required = false) {
-    this.flag = flag;
-    this.description = description;
-    this.required = required;
-  }
-}
+import { Command, CommandProps } from "./Command";
+import { Option, OptionProps } from "./Option";
 
 export class CliBuilder {
-  rootCommand: Command;
+  private defaultCommand: Command;
 
-  constructor() {
-    this.rootCommand = new Command("", "");
+  constructor({ name, description }: CommandProps) {
+    this.defaultCommand = new Command({ name, description });
   }
 
-  command(name: string, description: string): Command {
-    const command = new Command(name, description);
-    this.rootCommand.addCommand(command);
-    return command;
+  public addCommand(props: CommandProps): CliBuilder {
+    const command = new Command(props);
+    this.defaultCommand.addSubcommand(command);
+    return this;
   }
 
-  parse(args: string[]): void {
-    this.rootCommand.parse(args);
+  public addOption(props: OptionProps): CliBuilder {
+    const option = new Option(props);
+    this.defaultCommand.addOption(option);
+    return this;
+  }
+
+  public setDefaultCommand(command: Command): CliBuilder {
+    this.defaultCommand = command;
+    return this;
+  }
+
+  public parse(argv: string[] = process.argv.slice(2)): void {
+    let command: Command | undefined;
+
+    if (argv.length === 0) {
+      command = this.defaultCommand;
+    } else {
+      const arg = argv.shift()!;
+      command = this.defaultCommand.subcommands.get(arg);
+      if (!command) {
+        argv.unshift(arg);
+        command = this.defaultCommand;
+      }
+    }
+
+    console.log(`Executing command: ${command.name} ${argv.join(" ")}`);
+    command.emit(command.name, argv);
+  }
+
+  public help(): void {
+    console.log("Help");
   }
 }

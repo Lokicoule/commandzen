@@ -1,22 +1,62 @@
-import { CliBuilder, Command, Option } from "./CliBuilder";
+import { CliBuilder } from "./CliBuilder";
+import { Command } from "./Command";
+import { Option } from "./Option";
 
-const cli = new CliBuilder();
+const cli = new CliBuilder({ name: "mycli", description: "My CLI tool" });
 
-const subcommand = new Command("subcommand", "A subcommand example")
-  .addOption(new Option("-s, --sub-option", "A subcommand option", true))
-  .addOption(
-    new Option("-a, --optional-option [argument]", "Another subcommand option")
-  )
-  .addOption(
-    new Option(
-      "-r, --required-option <path>",
-      "A required subcommand option",
-      true
-    )
-  );
-const command = cli
-  .command("command", "A command example")
-  .addOption(new Option("-o, --option", "An option example", true))
-  .addCommand(subcommand);
+const command = Command.create({
+  name: "command1",
+  description: "Command 1 description",
+});
+command.addOption(
+  Option.create({
+    flag: "-f, --flag",
+    description: "A flag option",
+  })
+);
 
-cli.parse(process.argv.slice(2));
+command.addOption(
+  Option.create({
+    flag: "-r, --required <required>",
+    description: "A required option",
+    defaultValue: 42,
+  })
+);
+
+command.addOption(
+  Option.create({
+    flag: "-o, --optional [optional]",
+    description: "An optional option",
+    defaultValue: 42,
+  })
+);
+
+command.addOption(
+  Option.create({
+    flag: "-a, --array <array>",
+    description: "An array option",
+    defaultValue: [1, 2, 3],
+  })
+);
+
+command.registerAction((argv) => {
+  console.log("Running command1");
+  console.log(argv);
+});
+
+const defaultCommand = Command.create({
+  name: "default",
+  description: "Default command",
+});
+
+defaultCommand.registerAction((argv) => {
+  console.log("Running default command");
+  console.log(argv);
+});
+
+cli.setDefaultCommand(defaultCommand);
+cli.addCommand(command);
+
+cli.parse();
+
+console.log(cli);
