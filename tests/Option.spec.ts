@@ -102,15 +102,6 @@ describe("Option", () => {
       expect(option.key).toBe("f");
     });
 
-    it("should handle no flag correctly", () => {
-      const option = new Option({
-        flag: "",
-        description: "foo option",
-      });
-      expect(option.required).toBe(false);
-      expect(option.key).toBeUndefined();
-    });
-
     test("should handle optional default value", () => {
       const option = new Option({
         flag: "--foo [bar]",

@@ -11,22 +11,9 @@ type ParsedArgv = {
 
 export class CliBuilder {
   private defaultCommand: Command;
-  private helpCommand: Command;
-  private helpOption: Option;
 
   constructor({ name, description }: CommandProps) {
     this.defaultCommand = new Command({ name, description });
-
-    this.helpCommand = new Command({
-      name: "help",
-      description: "Display help information",
-    });
-    this.helpCommand.registerAction(() => this.defaultCommand.help());
-
-    this.helpOption = new Option({
-      flag: "-h, --help",
-      description: "Display help information",
-    });
 
     this.addHelpToDefaultCommand();
   }
@@ -39,8 +26,12 @@ export class CliBuilder {
    * Adds a command to the CLI.
    */
   public addCommand(command: Command): CliBuilder {
-    command.addSubcommand(this.helpCommand);
-    command.addOption(this.helpOption);
+    command.addOption(
+      new Option({
+        flag: "-h, --help",
+        description: "Display help information for this command.",
+      })
+    );
     this.defaultCommand.addSubcommand(command);
     return this;
   }
@@ -130,7 +121,7 @@ export class CliBuilder {
         if (option) {
           const nextArg = argv[i + 1];
           if (nextArg && !nextArg.startsWith("-")) {
-            options[option.key || ""] = nextArg;
+            options[option.key] = nextArg;
             i++;
           } else {
             if (option.required) {
@@ -139,7 +130,7 @@ export class CliBuilder {
               );
               process.exit(1);
             }
-            options[option.key || ""] = true;
+            options[option.key] = true;
           }
         } else {
           args.push(arg);
@@ -158,7 +149,11 @@ export class CliBuilder {
    * This is called when the default command is set or when a command is added.
    */
   private addHelpToDefaultCommand(): void {
-    this.defaultCommand.addSubcommand(this.helpCommand);
-    this.defaultCommand.addOption(this.helpOption);
+    this.defaultCommand.addOption(
+      new Option({
+        flag: "-h, --help",
+        description: "Display help information",
+      })
+    );
   }
 }

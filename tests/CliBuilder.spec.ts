@@ -29,11 +29,9 @@ describe("CliBuilder", () => {
       expect(cli.addOption).toBeDefined();
     });
 
-    it("should create a help command and option", () => {
+    it("should create help option", () => {
       const cli = createCliBuilder();
       const defaultCommand = cli["defaultCommand"];
-
-      expect(defaultCommand.subcommands.has("help")).toBeTruthy();
 
       const helpOption = defaultCommand.options.find(
         (o) => o.shortName === "-h" || o.longName === "--help"
@@ -53,13 +51,11 @@ describe("CliBuilder", () => {
       expect(cli["defaultCommand"].subcommands.get("test")).toBe(testCommand);
     });
 
-    it("should add a help command and option to the added command", () => {
+    it("should add help option to the added command", () => {
       const cli = createCliBuilder();
       const testCommand = createTestCommand();
 
       cli.addCommand(testCommand);
-
-      expect(testCommand.subcommands.has("help")).toBeTruthy();
 
       const helpOption = testCommand.options.find(
         (o) => o.shortName === "-h" || o.longName === "--help"
@@ -90,13 +86,11 @@ describe("CliBuilder", () => {
       expect(cli["defaultCommand"]).toBe(testCommand);
     });
 
-    it("should add a help command and option to the new default command", () => {
+    it("should add help option to the new default command", () => {
       const cli = createCliBuilder();
       const testCommand = createTestCommand();
 
       cli.setDefaultCommand(testCommand);
-
-      expect(testCommand.subcommands.has("help")).toBeTruthy();
 
       const helpOption = testCommand.options.find(
         (o) => o.shortName === "-h" || o.longName === "--help"
@@ -146,6 +140,162 @@ describe("CliBuilder", () => {
       cli.parse(["test", "-t"]);
 
       expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe("help", () => {
+    it("should display help information for the default command", () => {
+      const cli = createCliBuilder();
+      const spy = jest.spyOn(console, "info");
+      const exitSpy = jest
+        .spyOn(process, "exit")
+        .mockImplementation(() => undefined as never);
+
+      cli.parse(["-h"]);
+
+      expect(spy).toHaveBeenCalled();
+      exitSpy.mockRestore();
+    });
+
+    it("should display help information for the specified command", () => {
+      const cli = createCliBuilder();
+      const testCommand = createTestCommand();
+      const spy = jest.spyOn(console, "info");
+      const exitSpy = jest
+        .spyOn(process, "exit")
+        .mockImplementation(() => undefined as never);
+
+      cli.addCommand(testCommand);
+
+      cli.parse(["test", "-h"]);
+
+      expect(spy).toHaveBeenCalled();
+      exitSpy.mockRestore();
+    });
+  });
+
+  describe("parseArgs", () => {
+    let cliBuilder: CliBuilder;
+    let mockExit: jest.SpyInstance;
+
+    beforeEach(() => {
+      cliBuilder = new CliBuilder({ name: "test", description: "Test CLI" });
+      mockExit = jest.spyOn(process, "exit").mockImplementation(() => {
+        throw new Error("process.exit called");
+      });
+    });
+
+    afterEach(() => {
+      mockExit.mockRestore();
+    });
+
+    it("should exit for required option without argument", () => {
+      const requiredOptionCommand = Command.create({
+        name: "req-opt",
+        description: "Command with required option",
+      }).addOption(
+        Option.create({
+          flag: "-r, --required <value>",
+          description: "Required option",
+        })
+      );
+      const exitSpy = jest
+        .spyOn(process, "exit")
+        .mockImplementation(() => undefined as never);
+      cliBuilder.addCommand(requiredOptionCommand);
+      const spy = jest.spyOn(console, "error").mockImplementation();
+
+      const argv = ["req-opt", "-r"];
+
+      cliBuilder.parse(argv);
+
+      expect(spy).toHaveBeenCalledWith(
+        'The option "-r, --required <value>" requires an argument, but it was not provided.'
+      );
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
+
+    it("should not exit for required option with argument", () => {
+      const requiredOptionCommand = Command.create({
+        name: "req-opt",
+        description: "Command with required option",
+      }).addOption(
+        Option.create({
+          flag: "-r, --required <value>",
+          description: "Required option",
+        })
+      );
+
+      cliBuilder.addCommand(requiredOptionCommand);
+
+      const argv = ["req-opt", "--required", "argument"];
+
+      expect(() => cliBuilder.parse(argv)).not.toThrow();
+    });
+
+    it("should not exit for non-required option without argument", () => {
+      const nonRequiredOptionCommand = Command.create({
+        name: "non-req-opt",
+        description: "Command with non-required option",
+      }).addOption(
+        Option.create({
+          flag: "-n, --non-required [value]",
+          description: "Non-required option",
+        })
+      );
+
+      cliBuilder.addCommand(nonRequiredOptionCommand);
+
+      const argv = ["non-req-opt", "--non-required"];
+
+      expect(() => cliBuilder.parse(argv)).not.toThrow();
+    });
+
+    it("should not exit for non-required option with argument", () => {
+      const nonRequiredOptionCommand = Command.create({
+        name: "non-req-opt",
+        description: "Command with non-required option",
+      }).addOption(
+        Option.create({
+          flag: "-n, --non-required [value]",
+          description: "Non-required option",
+        })
+      );
+
+      cliBuilder.addCommand(nonRequiredOptionCommand);
+
+      const argv = ["non-req-opt", "--non-required", "argument"];
+
+      expect(() => cliBuilder.parse(argv)).not.toThrow();
+    });
+
+    it("should add to arguments array for non-required option with argument", () => {
+      const nonRequiredOptionCommand = Command.create({
+        name: "non-req-opt",
+        description: "Command with non-required option",
+      }).addOption(
+        Option.create({
+          flag: "-n, --non-required [value]",
+          description: "Non-required option",
+        })
+      );
+
+      const spy = jest.fn();
+
+      nonRequiredOptionCommand.registerAction(spy);
+
+      cliBuilder.addCommand(nonRequiredOptionCommand);
+
+      const argv = ["non-req-opt", "argument"];
+
+      cliBuilder.parse(argv);
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          args: ["argument"],
+        })
+      );
     });
   });
 });

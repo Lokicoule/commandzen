@@ -72,6 +72,7 @@ describe("Command", () => {
     const option = Option.create({
       flag: "-t, --test",
       description: "Test option",
+      defaultValue: "test",
     });
 
     command.addOption(option);
@@ -90,11 +91,62 @@ describe("Command", () => {
     expect(spy).toHaveBeenCalledTimes(5);
     expect(spy).toHaveBeenCalledWith("test: Test command");
     expect(spy).toHaveBeenCalledWith("  Options:");
-    expect(spy).toHaveBeenCalledWith("    -t, --test: Test option");
+    expect(spy).toHaveBeenCalledWith(
+      "    -t, --test: Test option (default: test)"
+    );
     expect(spy).toHaveBeenCalledWith("  Commands:");
     expect(spy).toHaveBeenCalledWith("    subcommand: Test subcommand");
 
     spy.mockRestore();
+  });
+
+  it("should display help information with a prefix and without default value", () => {
+    const command = Command.create({
+      name: "test",
+      description: "Test command",
+    });
+
+    const option = Option.create({
+      flag: "-t, --test",
+      description: "Test option",
+    });
+
+    command.addOption(option);
+
+    const subcommand = Command.create({
+      name: "subcommand",
+      description: "Test subcommand",
+    });
+
+    command.addSubcommand(subcommand);
+
+    const spy = jest.spyOn(console, "info").mockImplementation();
+
+    command.help("\t");
+
+    expect(spy).toHaveBeenCalledTimes(5);
+    expect(spy).toHaveBeenCalledWith("\ttest: Test command");
+    expect(spy).toHaveBeenCalledWith("\t  Options:");
+    expect(spy).toHaveBeenCalledWith("\t    -t, --test: Test option");
+    expect(spy).toHaveBeenCalledWith("\t  Commands:");
+    expect(spy).toHaveBeenCalledWith("\t    subcommand: Test subcommand");
+
+    spy.mockRestore();
+  });
+
+  it("should emit an event", () => {
+    const command = Command.create({
+      name: "test",
+      description: "Test command",
+    });
+
+    const callback = jest.fn();
+
+    command.on("test", callback);
+
+    command.emit("test", {});
+
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 
   it("should register an action", () => {
@@ -118,7 +170,7 @@ describe("Command", () => {
       description: "Test command",
     });
 
-    command.aliases = ["alias1", "alias2"];
+    command.addAlias("alias1", "alias2");
 
     expect(command.aliases).toEqual(["alias1", "alias2"]);
   });
@@ -139,7 +191,7 @@ describe("Command", () => {
       description: "Test option 2",
     });
 
-    command.options = [option1, option2];
+    command.addOption(option1, option2);
 
     expect(command.options).toEqual([option1, option2]);
 
@@ -154,5 +206,25 @@ describe("Command", () => {
     expect(command.findOption("test2")).toEqual(option2);
 
     expect(command.findOption("test")).toBeUndefined();
+  });
+
+  it("should emit an event with an alias", () => {
+    const callback = jest.fn();
+    const rootCommand = Command.create({
+      name: "root",
+      description: "Root command",
+    });
+    const command = Command.create({
+      name: "test",
+      description: "Test command",
+    });
+
+    command.addAlias("t");
+    command.on("t", callback);
+    rootCommand.addSubcommand(command);
+
+    command.emit("t", {});
+
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 });

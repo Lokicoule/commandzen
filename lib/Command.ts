@@ -67,8 +67,13 @@ export class Command extends EventEmitter {
    * @returns {Command}
    * @description Adds an option to the command
    */
-  public addOption(option: Option): Command {
-    this.options.push(option);
+  public addOption(...option: Option[]): Command {
+    this.state.options.push(...option);
+    return this;
+  }
+
+  public addAlias(...aliases: string[]): Command {
+    this.state.aliases.push(...aliases);
     return this;
   }
 
@@ -139,32 +144,12 @@ export class Command extends EventEmitter {
   }
 
   /**
-   * @setter name
-   * @param {string} name
-   * @returns {void}
-   * @description Sets the name of the command
-   */
-  public set name(name: string) {
-    this.state.name = name;
-  }
-
-  /**
    * @getter description
    * @returns {string}
    * @description Gets the description of the command
    */
   public get description(): string {
     return this.state.description;
-  }
-
-  /**
-   * @setter description
-   * @param {string} description
-   * @returns {void}
-   * @description Sets the description of the command
-   */
-  public set description(description: string) {
-    this.state.description = description;
   }
 
   /**
@@ -177,32 +162,12 @@ export class Command extends EventEmitter {
   }
 
   /**
-   * @setter aliases
-   * @param {string[]} aliases
-   * @returns {void}
-   * @description Sets the aliases of the command
-   */
-  public set aliases(aliases: string[]) {
-    this.state.aliases = aliases;
-  }
-
-  /**
    * @getter options
    * @returns {Option[]}
    * @description Gets the options of the command
    */
   public get options(): Option[] {
     return this.state.options;
-  }
-
-  /**
-   * @setter options
-   * @param {Option[]} options
-   * @returns {void}
-   * @description Sets the options of the command
-   */
-  public set options(options: Option[]) {
-    this.state.options = options;
   }
 
   /**
