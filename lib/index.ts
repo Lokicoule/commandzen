@@ -33,7 +33,7 @@ command.addOption(
 
 command.addOption(
   Option.create({
-    flag: "-a, --array <array>",
+    flag: "-a, --array-test <array>",
     description: "An array option",
     defaultValue: [1, 2, 3],
   })
@@ -58,5 +58,3 @@ cli.setDefaultCommand(defaultCommand);
 cli.addCommand(command);
 
 cli.parse();
-
-console.log(cli);

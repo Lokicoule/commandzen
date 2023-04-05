@@ -1,17 +1,29 @@
 import { EventEmitter } from "events";
 import { Option } from "./Option";
 
+/**
+ * @type CommandProps
+ * @description
+ * Represents the properties of a command.
+ * @property {string} name
+ * @property {string} description
+ */
 export type CommandProps = {
   name: string;
   description: string;
 };
 
-export type CommandState = CommandProps & {
+type CommandState = CommandProps & {
   aliases: string[];
   options: Option[];
   subcommands: Map<string, Command>;
 };
 
+/**
+ * @class Command
+ * @description Represents a command
+ * @extends EventEmitter
+ */
 export class Command extends EventEmitter {
   private readonly state: CommandState;
 
@@ -68,67 +80,136 @@ export class Command extends EventEmitter {
    */
   public findOption(flag: string): Option | undefined {
     return this.options.find(
-      (o) => o.shortName === flag || o.longName === flag
+      (o) =>
+        o.shortName === flag ||
+        o.longName === flag ||
+        o.shortName === `-${flag}` ||
+        o.longName === `--${flag}`
     );
   }
 
   /**
    * @method help
+   * @param {string} prefix
    * @returns {void}
-   * @description Prints the help message for the command
+   * @description Displays help information for the command
    */
-  public help(): void {
-    console.info(`Usage: ${this.name} [options]`);
-    console.info(`\t${this.description}`);
-    console.info(`\nOptions:`);
-    this.options.forEach((option) => {
-      console.info(`\t${option.flag}\t\t${option.description}`);
-    });
-    console.info(`\nSubcommands:`);
-    this.subcommands.forEach((command) => {
-      console.info(`\t${command.name}\t\t${command.description}`);
-    });
+  public help(prefix = ""): void {
+    console.info(`${prefix}${this.name}: ${this.description}`);
 
-    process.exit(0);
+    if (this.options.length > 0) {
+      console.info(`${prefix}  Options:`);
+      for (const option of this.options) {
+        console.info(
+          `${prefix}    ${option.flag}: ${option.description}${
+            option.defaultValue !== undefined
+              ? ` (default: ${option.defaultValue})`
+              : ""
+          }`
+        );
+      }
+    }
+
+    if (this.subcommands.size > 0) {
+      console.info(`${prefix}  Commands:`);
+      for (const subcommand of this.subcommands.values()) {
+        subcommand.help(`${prefix}    `);
+      }
+    }
   }
 
-  public registerAction(callback: (argv: string[]) => void): Command {
+  /**
+   * @method registerAction
+   * @param {Function} callback
+   * @returns {Command}
+   * @description Registers an action for the command
+   */
+  public registerAction(callback: (argv: any) => void): Command {
     this.on(this.name, callback);
     return this;
   }
 
+  /**
+   * @getter name
+   * @returns {string}
+   * @description Gets the name of the command
+   */
   public get name(): string {
     return this.state.name;
   }
 
+  /**
+   * @setter name
+   * @param {string} name
+   * @returns {void}
+   * @description Sets the name of the command
+   */
   public set name(name: string) {
     this.state.name = name;
   }
 
+  /**
+   * @getter description
+   * @returns {string}
+   * @description Gets the description of the command
+   */
   public get description(): string {
     return this.state.description;
   }
 
+  /**
+   * @setter description
+   * @param {string} description
+   * @returns {void}
+   * @description Sets the description of the command
+   */
   public set description(description: string) {
     this.state.description = description;
   }
 
+  /**
+   * @getter aliases
+   * @returns {string[]}
+   * @description Gets the aliases of the command
+   */
   public get aliases(): string[] {
     return this.state.aliases;
   }
 
+  /**
+   * @setter aliases
+   * @param {string[]} aliases
+   * @returns {void}
+   * @description Sets the aliases of the command
+   */
   public set aliases(aliases: string[]) {
     this.state.aliases = aliases;
   }
 
+  /**
+   * @getter options
+   * @returns {Option[]}
+   * @description Gets the options of the command
+   */
   public get options(): Option[] {
     return this.state.options;
   }
 
+  /**
+   * @setter options
+   * @param {Option[]} options
+   * @returns {void}
+   * @description Sets the options of the command
+   */
   public set options(options: Option[]) {
     this.state.options = options;
   }
 
+  /**
+   * @getter subcommands
+   * @returns {Map<string, Command>}
+   * @description Gets the subcommands of the command
+   */
   public get subcommands(): Map<string, Command> {
     return this.state.subcommands;
   }
