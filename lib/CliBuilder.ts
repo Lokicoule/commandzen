@@ -97,6 +97,31 @@ export class CliBuilder {
         description: "Display help information",
       })
     );
+    this.defaultCommand.addSubcommand(
+      Command.create({
+        name: "help",
+        description: "Display help information",
+        options: [
+          Option.create({
+            flag: "-c, --command <command>",
+            description: "Display help information for a specific command",
+          }),
+        ],
+      }).registerAction<{
+        command?: string;
+      }>(({ command }) => {
+        if (command) {
+          const subcommand = this.defaultCommand.findSubcommand(command);
+          if (subcommand) {
+            subcommand.help();
+          } else {
+            console.warn(`Command '${command}' not found.`);
+          }
+        } else {
+          this.defaultCommand.help();
+        }
+      })
+    );
   }
 
   /**
@@ -109,15 +134,12 @@ export class CliBuilder {
   private runCommands(
     commandList: Array<{
       command: Command;
-      args: string[];
+
       options: Record<string, string | boolean>;
     }>
   ): void {
-    for (const { command, args, options } of commandList) {
-      CommandRunner.run(command, {
-        args,
-        options,
-      });
+    for (const { command, options } of commandList) {
+      CommandRunner.run(command, options);
     }
   }
 }

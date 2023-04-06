@@ -2,7 +2,6 @@ import { Command } from "./Command";
 
 type CommandResult = {
   command: Command;
-  args: string[];
   options: Record<string, string | boolean>;
 };
 
@@ -27,7 +26,6 @@ export class CommandParser {
   public static parse(command: Command, argv: string[]): Array<CommandResult> {
     const initialState: CommandResult = {
       command,
-      args: [],
       options: {},
     };
 
@@ -63,11 +61,8 @@ export class CommandParser {
     if (subcommand) {
       commandList.push({
         command: subcommand,
-        args: [],
         options: {},
       });
-    } else {
-      currentCommandResult.args.push(arg);
     }
 
     return commandList;
@@ -105,8 +100,6 @@ export class CommandParser {
         }
         currentCommandResult.options[option.key] = true;
       }
-    } else {
-      currentCommandResult.args.push(arg);
     }
 
     return commandList;

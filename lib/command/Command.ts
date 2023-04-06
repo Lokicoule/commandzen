@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { paddingRight } from "../utils/padding";
 import { Option } from "../option";
 
 /**
@@ -14,11 +15,6 @@ export interface CommandProps {
   aliases?: string[];
   options?: Option[];
   subcommands?: Map<string, Command>;
-}
-
-interface ActionProps<T> {
-  args: string[];
-  options: T;
 }
 
 /**
@@ -112,31 +108,58 @@ export class Command extends EventEmitter {
 
   /**
    * @method help
-   * @param {string} prefix
+   * @param {number} [indentationLevel=0]
+   * @param {string} [fullName=this.name]
+   * @param {string} [subcommandIndex=""]
    * @returns {void}
-   * @description Displays help information for the command
+   * @description Prints the help message for the command
    */
-  public help(prefix = ""): void {
-    console.info(`${prefix}${this.name}: ${this.description}`);
+  public help(
+    indentationLevel = 0,
+    fullName = this.name,
+    subcommandIndex = ""
+  ): void {
+    const indent = "  ";
+    const prefix = indent.repeat(indentationLevel);
+
+    console.info(`${prefix}Usage: ${fullName} [options]`);
+    console.info(`\n${prefix}${this.description}`);
 
     if (this.options.length > 0) {
-      console.info(`${prefix}  Options:`);
+      const maxLength = this.options.reduce(
+        (max, option) => Math.max(max, option.flag.length),
+        0
+      );
+
+      console.info(`\n${prefix}Options:`);
       for (const option of this.options) {
-        console.info(
-          `${prefix}    ${option.flag}: ${option.description}${
-            option.defaultValue !== undefined
-              ? ` (default: ${option.defaultValue})`
-              : ""
-          }`
-        );
+        const paddedFlag = paddingRight(option.flag, maxLength);
+        console.info(`${prefix}${indent}${paddedFlag}  ${option.description}`);
       }
+      console.info();
     }
 
     if (this.subcommands.size > 0) {
-      console.info(`${prefix}  Commands:`);
+      console.info(`\n${prefix}Subcommands:`);
+      let index = 1;
       for (const subcommand of this.subcommands.values()) {
-        subcommand.help(`${prefix}    `);
+        const newIndex = `${
+          subcommandIndex ? subcommandIndex + "." : ""
+        }${index}`;
+        console.info(`${prefix}${indent}${newIndex}. ${subcommand.name}`);
+        subcommand.help(
+          indentationLevel + 1,
+          `${fullName} ${subcommand.name}`,
+          newIndex
+        );
+        index++;
       }
+    }
+
+    if (indentationLevel === 0) {
+      console.info(
+        `Run ${fullName} [command] --help for more information on a command.`
+      );
     }
   }
 
@@ -146,7 +169,7 @@ export class Command extends EventEmitter {
    * @returns {Command}
    * @description Registers an action for the command
    */
-  public registerAction<T>(callback: (props: ActionProps<T>) => void): Command {
+  public registerAction<T>(callback: (props: T) => void): Command {
     this.on(this.name, callback);
     return this;
   }

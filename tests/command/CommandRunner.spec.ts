@@ -1,4 +1,4 @@
-import { ArgvCommand, Command, CommandRunner } from "../../lib";
+import { Command, CommandRunner } from "../../lib";
 
 describe("CommandRunner", () => {
   let command: Command;
@@ -11,25 +11,18 @@ describe("CommandRunner", () => {
   });
 
   it("should call registered action handler when running command", () => {
-    const argv: ArgvCommand = {
-      args: [],
-      options: {},
-    };
+    CommandRunner.run(command, {});
 
-    CommandRunner.run(command, argv);
     expect(actionHandler).toHaveBeenCalled();
   });
 
   it("should call help() and exit process when help option is provided", () => {
     const helpSpy = jest.spyOn(command, "help");
     const processExitSpy = jest.spyOn(process, "exit").mockImplementation();
-
-    const argv: ArgvCommand = {
-      args: [],
-      options: { help: true },
-    };
+    const argv = { help: true };
 
     CommandRunner.run(command, argv);
+
     expect(helpSpy).toHaveBeenCalled();
     expect(processExitSpy).toHaveBeenCalledWith(0);
 

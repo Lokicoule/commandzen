@@ -1,4 +1,4 @@
-import { Argument, Command, Option } from "../../lib";
+import { Command, Option } from "../../lib";
 
 describe("Command", () => {
   let command: Command;
@@ -26,8 +26,25 @@ describe("Command", () => {
   });
 
   it("should add an alias to the command", () => {
-    command.addAlias("t");
+    command.addAlias("t", "u", "v");
     expect(command.aliases).toContain("t");
+    expect(command.aliases).toContain("u");
+    expect(command.aliases).toContain("v");
+  });
+
+  it("should add aliases for subcommands", () => {
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+      aliases: ["st", "subt"],
+    });
+
+    command.addSubcommand(subcommand);
+
+    // Check if the subcommand and its aliases were added correctly
+    expect(command.subcommands.get("subtest")).toEqual(subcommand);
+    expect(command.subcommands.get("st")).toEqual(subcommand);
+    expect(command.subcommands.get("subt")).toEqual(subcommand);
   });
 
   it("should add an option to the command", () => {
@@ -40,16 +57,6 @@ describe("Command", () => {
     expect(command.options).toContain(option);
   });
 
-  it("should add an argument to the command", () => {
-    const argument = Argument.create({
-      flag: "<bar>",
-      description: "Test argument",
-    });
-
-    command.addArgument(argument);
-    expect(command.args).toContain(argument);
-  });
-
   it("should find an option by its flag", () => {
     const option = Option.create({
       flag: "-f, --flag",
@@ -59,16 +66,6 @@ describe("Command", () => {
     command.addOption(option);
     expect(command.findOption("-f")).toEqual(option);
     expect(command.findOption("--flag")).toEqual(option);
-  });
-
-  it("should find an argument by its key", () => {
-    const argument = Argument.create({
-      flag: "<bar>",
-      description: "Test argument",
-    });
-
-    command.addArgument(argument);
-    expect(command.findArgument("bar")).toEqual(argument);
   });
 
   it("should find a subcommand by its name", () => {
@@ -83,54 +80,62 @@ describe("Command", () => {
 
   it("should register and trigger an action for the command", (done) => {
     command.registerAction<{ flag: boolean }>((props) => {
-      expect(props.args).toEqual(["arg1", "arg2"]);
-      expect(props.options).toEqual({ flag: true });
+      expect(props).toEqual({ flag: true });
       done();
     });
 
     command.emit("test", {
-      args: ["arg1", "arg2"],
-      options: { flag: true },
+      flag: true,
     });
   });
 
-  it("should display help information for the command", () => {
-    const consoleInfoSpy = jest.spyOn(console, "info").mockImplementation();
-    const command = Command.create({
+  it("should print the help message correctly", () => {
+    const rootCommand = Command.create({
       name: "test",
       description: "Test command",
-    })
-      .addOption(
-        Option.create({
-          flag: "-t, --test",
-          description: "Test option",
-          defaultValue: "test",
-        }),
-        Option.create({
-          flag: "-f, --flag",
-          description: "Test flag",
-        })
-      )
-      .addSubcommand(
-        Command.create({
-          name: "subcommand",
-          description: "Test subcommand",
-        })
-      );
-
-    command.help();
-
-    expect(consoleInfoSpy).toHaveBeenCalledTimes(6);
-    expect(consoleInfoSpy).toHaveBeenCalledWith("test: Test command");
-    expect(consoleInfoSpy).toHaveBeenCalledWith("  Options:");
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "    -t, --test: Test option (default: test)"
+    });
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+    }).addSubcommand(
+      Command.create({
+        name: "subsubtest",
+        description: "Subsubtest command",
+      })
     );
-    expect(consoleInfoSpy).toHaveBeenCalledWith("    -f, --flag: Test flag");
-    expect(consoleInfoSpy).toHaveBeenCalledWith("  Commands:");
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "    subcommand: Test subcommand"
-    );
+
+    rootCommand.addSubcommand(subcommand);
+
+    const option = Option.create({
+      flag: "-f, --flag",
+      description: "Test flag",
+    });
+
+    rootCommand.addOption(option);
+
+    // Mock console.info to capture printed output
+    const consoleInfoSpy = jest
+      .spyOn(console, "info")
+      .mockImplementation(() => {});
+
+    rootCommand.help();
+
+    expect(consoleInfoSpy.mock.calls).toEqual([
+      ["Usage: test [options]"],
+      ["\nTest command"],
+      ["\nOptions:"],
+      ["  -f, --flag  Test flag"],
+      [],
+      ["\nSubcommands:"],
+      ["  1. subtest"],
+      ["  Usage: test subtest [options]"],
+      ["\n  Subtest command"],
+      ["\n  Subcommands:"],
+      ["    1.1. subsubtest"],
+      ["    Usage: test subtest subsubtest [options]"],
+      ["\n    Subsubtest command"],
+      ["Run test [command] --help for more information on a command."],
+    ]);
 
     consoleInfoSpy.mockRestore();
   });
