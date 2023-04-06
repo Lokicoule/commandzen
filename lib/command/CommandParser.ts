@@ -58,7 +58,7 @@ export class CommandParser {
     commandList: CommandResult[]
   ): CommandResult[] {
     const currentCommandResult = commandList[commandList.length - 1];
-    const subcommand = currentCommandResult.command.subcommands.get(arg);
+    const subcommand = currentCommandResult.command.findSubcommand(arg);
 
     if (subcommand) {
       commandList.push({

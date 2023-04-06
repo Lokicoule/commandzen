@@ -1,4 +1,4 @@
-import { Command, Option } from "../../lib";
+import { Argument, Command, Option } from "../../lib";
 
 describe("Command", () => {
   let command: Command;
@@ -40,6 +40,16 @@ describe("Command", () => {
     expect(command.options).toContain(option);
   });
 
+  it("should add an argument to the command", () => {
+    const argument = Argument.create({
+      flag: "<bar>",
+      description: "Test argument",
+    });
+
+    command.addArgument(argument);
+    expect(command.args).toContain(argument);
+  });
+
   it("should find an option by its flag", () => {
     const option = Option.create({
       flag: "-f, --flag",
@@ -49,6 +59,26 @@ describe("Command", () => {
     command.addOption(option);
     expect(command.findOption("-f")).toEqual(option);
     expect(command.findOption("--flag")).toEqual(option);
+  });
+
+  it("should find an argument by its key", () => {
+    const argument = Argument.create({
+      flag: "<bar>",
+      description: "Test argument",
+    });
+
+    command.addArgument(argument);
+    expect(command.findArgument("bar")).toEqual(argument);
+  });
+
+  it("should find a subcommand by its name", () => {
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+    });
+
+    command.addSubcommand(subcommand);
+    expect(command.findSubcommand("subtest")).toEqual(subcommand);
   });
 
   it("should register and trigger an action for the command", (done) => {

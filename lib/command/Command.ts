@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { Argument } from "../argument";
 import { Option } from "../option";
 
 /**
@@ -13,6 +14,7 @@ export interface CommandProps {
   description: string;
   aliases?: string[];
   options?: Option[];
+  args?: Argument[];
   subcommands?: Map<string, Command>;
 }
 
@@ -32,6 +34,7 @@ export class Command extends EventEmitter {
     public readonly description: string,
     public readonly aliases: string[] = [],
     public readonly options: Option[] = [],
+    public readonly args: Argument[] = [],
     public readonly subcommands: Map<string, Command> = new Map()
   ) {
     super();
@@ -50,6 +53,7 @@ export class Command extends EventEmitter {
       props.description,
       props.aliases,
       props.options,
+      props.args,
       props.subcommands
     );
   }
@@ -89,6 +93,17 @@ export class Command extends EventEmitter {
   }
 
   /**
+   * @method addArgument
+   * @param {Argument} args
+   * @returns {Command}
+   * @description Adds an argument to the command
+   */
+  public addArgument(...args: Argument[]): Command {
+    this.args.push(...args);
+    return this;
+  }
+
+  /**
    * @method findOption
    * @param {string} flag
    * @returns {Option | undefined}
@@ -98,6 +113,26 @@ export class Command extends EventEmitter {
     return this.options.find(
       (o) => o.shortName === flag || o.longName === flag
     );
+  }
+
+  /**
+   * @method findSubcommand
+   * @param {string} name
+   * @returns {Command | undefined}
+   * @description Finds a subcommand by its name
+   */
+  public findSubcommand(name: string): Command | undefined {
+    return this.subcommands.get(name);
+  }
+
+  /**
+   * @method findArgument
+   * @param {string} key
+   * @returns {Argument | undefined}
+   * @description Finds an argument by its key
+   */
+  public findArgument(key: string): Argument | undefined {
+    return this.args.find((a) => a.key === key);
   }
 
   /**
