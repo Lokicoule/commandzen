@@ -63,4 +63,4 @@ const uninstallCommand = new Command({
 cli.addCommand(uninstallCommand);
 
 // Parse and run the CLI
-cli.parse(process.argv);
+cli.parse();

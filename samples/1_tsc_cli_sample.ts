@@ -61,4 +61,4 @@ const watchCommand = new Command({
 cli.addCommand(watchCommand);
 
 // Parse and run the CLI
-cli.parse(process.argv);
+cli.parse();

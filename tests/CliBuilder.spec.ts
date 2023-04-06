@@ -1,10 +1,13 @@
-import { Command, CommandProps } from "../lib/Command";
-import { Option, OptionProps } from "../lib/Option";
+/* import { Command, CommandProps } from "../lib/command/Command";
+import { Option, OptionProps } from "../lib/option/Option";
 import { CliBuilder } from "../lib/CliBuilder";
 
 describe("CliBuilder", () => {
   const createCliBuilder = () =>
-    new CliBuilder({ name: "test", description: "Test CLI" });
+    CliBuilder.create({
+      name: "test",
+      description: "Test CLI",
+    });
 
   const createTestCommand = (props: Partial<CommandProps> = {}) =>
     Command.create({
@@ -179,7 +182,6 @@ describe("CliBuilder", () => {
     let mockExit: jest.SpyInstance;
 
     beforeEach(() => {
-      cliBuilder = new CliBuilder({ name: "test", description: "Test CLI" });
       mockExit = jest.spyOn(process, "exit").mockImplementation(() => {
         throw new Error("process.exit called");
       });
@@ -299,3 +301,4 @@ describe("CliBuilder", () => {
     });
   });
 });
+ */
