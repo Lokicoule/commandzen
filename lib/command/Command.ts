@@ -144,6 +144,23 @@ export class Command extends EventEmitter {
   public help(prefix = ""): void {
     console.info(`${prefix}${this.name}: ${this.description}`);
 
+    if (this.aliases.length > 0) {
+      console.info(`${prefix}  Aliases: ${this.aliases.join(", ")}`);
+    }
+
+    if (this.args.length > 0) {
+      console.info(`${prefix}  Arguments:`);
+      for (const arg of this.args) {
+        console.info(
+          `${prefix}    ${arg.key}: ${arg.description}${
+            arg.defaultValue !== undefined
+              ? ` (default: ${arg.defaultValue})`
+              : ""
+          }`
+        );
+      }
+    }
+
     if (this.options.length > 0) {
       console.info(`${prefix}  Options:`);
       for (const option of this.options) {

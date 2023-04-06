@@ -1,6 +1,9 @@
 import { Command, CommandParser, CommandProps, CommandRunner } from "./command";
 import { Option, OptionProps } from "./option/Option";
 
+type CommandArgs = Record<string, string | undefined>;
+type CommandOptions = Record<string, string | boolean>;
+
 /**
  * @class CliBuilder
  * @description
@@ -109,11 +112,28 @@ export class CliBuilder {
   private runCommands(
     commandList: Array<{
       command: Command;
-      args: string[];
-      options: Record<string, string | boolean>;
+      args: CommandArgs;
+      options: CommandOptions;
     }>
   ): void {
     for (const { command, args, options } of commandList) {
+      for (const arg of command.args) {
+        // check if default value is set
+        if (arg.defaultValue !== undefined) {
+          args[arg.key] =
+            args[arg.key] ?? (arg.defaultValue as string | undefined);
+        } else if (arg.required) {
+          // check if required
+          if (args[arg.key] === undefined) {
+            console.info(
+              `Missing required argument for command: ${command.name}`
+            );
+            command.help();
+            process.exit(1);
+          }
+        }
+      }
+
       CommandRunner.run(command, {
         args,
         options,

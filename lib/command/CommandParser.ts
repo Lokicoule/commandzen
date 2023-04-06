@@ -2,7 +2,7 @@ import { Command } from "./Command";
 
 type CommandResult = {
   command: Command;
-  args: string[];
+  args: Record<string, string | undefined>;
   options: Record<string, string | boolean>;
 };
 
@@ -27,20 +27,28 @@ export class CommandParser {
   public static parse(command: Command, argv: string[]): Array<CommandResult> {
     const initialState: CommandResult = {
       command,
-      args: [],
+      args: {},
       options: {},
     };
 
-    const commandList = argv.reduce<Array<CommandResult>>(
-      (acc, arg, index, arr) => {
+    const commandList = argv.reduce<{ acc: CommandResult[]; offset: number }>(
+      (state, arg, index, arr) => {
+        const nextState: {
+          acc: CommandResult[];
+          offset: number;
+        } = { ...state, offset: state.offset - 1 };
+        if (nextState.offset > 0) {
+          return nextState;
+        }
+
         if (!arg.startsWith("-")) {
-          return this.handleSubcommand(arg, acc);
+          return this.handleSubcommand(arg, nextState.acc);
         } else {
-          return this.handleOption(arg, acc, arr, index);
+          return this.handleOption(arg, nextState.acc, arr, index);
         }
       },
-      [initialState]
-    );
+      { acc: [initialState], offset: 0 }
+    ).acc;
 
     return commandList;
   }
@@ -56,21 +64,22 @@ export class CommandParser {
   private static handleSubcommand(
     arg: string,
     commandList: CommandResult[]
-  ): CommandResult[] {
+  ): { acc: CommandResult[]; offset: number } {
     const currentCommandResult = commandList[commandList.length - 1];
     const subcommand = currentCommandResult.command.findSubcommand(arg);
 
     if (subcommand) {
       commandList.push({
         command: subcommand,
-        args: [],
+        args: {},
         options: {},
       });
     } else {
-      currentCommandResult.args.push(arg);
+      currentCommandResult.args[currentCommandResult.command.args.shift().key] =
+        arg;
     }
 
-    return commandList;
+    return { acc: commandList, offset: 0 };
   }
 
   /**
@@ -88,7 +97,7 @@ export class CommandParser {
     commandList: CommandResult[],
     argv: string[],
     index: number
-  ): CommandResult[] {
+  ): { acc: CommandResult[]; offset: number } {
     const currentCommandResult = commandList[commandList.length - 1];
     const option = currentCommandResult.command.findOption(arg);
 
@@ -105,10 +114,8 @@ export class CommandParser {
         }
         currentCommandResult.options[option.key] = true;
       }
-    } else {
-      currentCommandResult.args.push(arg);
     }
 
-    return commandList;
+    return { acc: commandList, offset: 2 };
   }
 }

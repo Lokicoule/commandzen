@@ -6,7 +6,7 @@ import { Command } from "./Command";
  * The command arguments and options.
  */
 export interface ArgvCommand {
-  args: string[];
+  args: Record<string, string | undefined>;
   options: Record<string, string | boolean>;
 }
 

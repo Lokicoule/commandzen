@@ -10,6 +10,7 @@ import { ArgumentParser } from "./ArgumentParser";
 export type ArgumentProps = {
   flag: string;
   description: string;
+  defaultValue?: unknown;
 };
 
 /**
@@ -22,7 +23,8 @@ export class Argument {
     public readonly flag: string,
     public readonly description: string,
     public readonly key: string | undefined,
-    public readonly required: boolean
+    public readonly required: boolean,
+    public readonly defaultValue: unknown | undefined
   ) {}
 
   /**
@@ -36,6 +38,12 @@ export class Argument {
   public static create(props: ArgumentProps): Argument {
     const { key, required } = ArgumentParser.parse(props.flag);
 
-    return new Argument(props.flag, props.description, key, required);
+    return new Argument(
+      props.flag,
+      props.description,
+      key,
+      required,
+      props.defaultValue
+    );
   }
 }
