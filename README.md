@@ -10,19 +10,10 @@ The CommandZen Library is a TypeScript library designed to help to create comman
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Importing the Library](#importing-the-library)
-  - [Creating a CLI Application](#creating-a-cli-application)
 - [API](#api)
   - [CliBuilder](#clibuilder)
   - [Command](#command)
   - [Option](#option)
-  - [Argument](#argument)
-- [Example](#example)
-- [Advanced Usage](#advanced-usage)
-  - [Default Options](#default-options)
-  - [Default Command](#default-command)
-  - [Subcommands](#subcommands)
-  - [Customizing Help Messages](#customizing-help-messages)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -59,11 +50,13 @@ To use CommandZen, you need to define commands and options for your CLI. You can
 ```ts
 import { CliBuilder, Command, Option } from "commandzen";
 
+// Create a new CLI instance
 const cli = CliBuilder.create({
   name: "mycli",
   description: "My CLI tool",
 });
 
+// Add 'greet' command with options and action
 cli
   .addCommand(
     Command.create({
@@ -87,14 +80,17 @@ cli
         }
       )
   )
+  // Add a global option to the root command
   .addOption({
     flag: "-v, --version <version>",
     description: "Provide a version to the root command",
   })
+  // Register action for the global option
   .registerAction<{ version: string }>(({ version }) => {
     console.log(`Version: ${version}`);
   });
 
+// Parse the CLI input
 cli.parse();
 ```
 
@@ -180,7 +176,7 @@ cli.parse();
 
 The Command class represents a single command or subcommand in a CLI application. It contains options and an action to be executed when the command is called.
 
-#### Public Methods
+#### 1. Public Methods
 
 - `create(props: CommandProps): Command`
 
@@ -290,7 +286,7 @@ This method finds an option by its flag (short or long name).
 
 This method finds a subcommand by its name.
 
-#### CommandProps Type
+#### 2. CommandProps Type
 
 The `CommandProps` type is used to define the properties of a `Command` object.
 
@@ -304,7 +300,7 @@ The `CommandProps` type is used to define the properties of a `Command` object.
 
 The `Option` class represents a command line option and is used to define options for commands in a CLI application. It provides methods to create and manage options, including parsing their flags and setting default values.
 
-#### Public Method
+#### 1. Public Method
 
 - `create(props: OptionProps): Option`
 
@@ -317,61 +313,13 @@ const verboseOption = Option.create({
 });
 ```
 
-#### OptionProps Type
+#### 2. OptionProps Type
 
 The `OptionProps` type represents the properties of an option and includes the following properties:
 
 - `flag` (string): A string representing the option's flag, such as -v, --verbose.
 - `description` (string): A string describing the option's purpose.
 - `defaultValue` (unknown | undefined): An optional default value for the option.
-
-####
-
-## Example
-
-## Advanced Usage
-
-This section demonstrates advanced usage patterns with the CliBuilder, Command, and Option APIs to build a powerful and flexible CLI application.
-
-### Subcommands
-
-You can create subcommands by chaining the addCommand method on a parent Command object:
-
-```ts
-const cli = new CliBuilder("my-cli", "A powerful CLI application");
-
-const mainCommand = Command.create({
-  name: "main",
-  description: "The main command",
-})
-  .addOption({
-    // main options...
-  })
-  .addAction(() => console.log("Executing main command"));
-
-const subCommand1 = Command.create({
-  name: "sub1",
-  description: "Subcommand 1",
-}).addAction(() => console.log("Executing subcommand 1"));
-
-const subCommand2 = Command.create({
-  name: "sub2",
-  description: "Subcommand 2",
-}).addAction(() => console.log("Executing subcommand 2"));
-
-mainCommand.addCommand(subCommand1).addCommand(subCommand2);
-cli.addCommand(mainCommand);
-```
-
-Now the CLI application supports `my-cli main sub1` and `my-cli main sub2` commands.
-
-### Global Options
-
-You can define global options that apply to all commands and subcommands:
-
-```ts
-
-```
 
 ## Contribution
 
