@@ -48,13 +48,14 @@ describe("Command", () => {
   });
 
   it("should add an option to the command", () => {
-    const option = Option.create({
+    const option = {
       flag: "-f, --flag",
       description: "Test flag",
-    });
+    };
+    const parsedOption = Option.create(option);
 
     command.addOption(option);
-    expect(command.options).toContain(option);
+    expect(command.options).toContainEqual(parsedOption);
   });
 
   it("should find an option by its flag", () => {

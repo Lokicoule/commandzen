@@ -1,4 +1,4 @@
-import { CliBuilder, Command } from "../lib";
+import { CliBuilder, Command, CommandParser, CommandRunner } from "../lib";
 
 describe("CliBuilder", () => {
   const defaultCommandProps = {
@@ -98,5 +98,42 @@ describe("CliBuilder", () => {
         "Command 'nonexistent' not found."
       );
     });
+  });
+
+  it("should add a global option to the CLI", () => {
+    const optionProps = {
+      flag: "-f, --flag",
+      description: "Test flag",
+    };
+
+    const subcommand = Command.create({
+      name: "subcommand",
+      description: "Subcommand description",
+    });
+
+    const cliBuilder = CliBuilder.create(defaultCommandProps);
+    cliBuilder.addCommand(subcommand);
+    cliBuilder.addGlobalOption(optionProps);
+
+    const defaultCommandOption = cliBuilder["defaultCommand"].findOption("-f");
+    const subcommandOption = subcommand.findOption("-f");
+
+    expect(defaultCommandOption.flag).toBe(optionProps.flag);
+    expect(defaultCommandOption.description).toBe(optionProps.description);
+    expect(subcommandOption.flag).toBe(optionProps.flag);
+    expect(subcommandOption.description).toBe(optionProps.description);
+  });
+
+  it("should parse arguments from process.argv.slice(2) by default", () => {
+    const cliBuilder = CliBuilder.create(defaultCommandProps);
+    const processArgvSpy = jest
+      .spyOn(process.argv, "slice")
+      .mockReturnValue(["node", "script", "arg1", "arg2"]);
+
+    const parseSpy = jest.spyOn(cliBuilder, "parse");
+
+    cliBuilder.parse();
+
+    expect(parseSpy).toHaveBeenCalledWith();
   });
 });

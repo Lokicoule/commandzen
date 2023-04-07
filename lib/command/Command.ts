@@ -1,21 +1,21 @@
 import { EventEmitter } from "events";
 import { paddingRight } from "../utils/padding";
-import { Option } from "../option";
+import { Option, OptionProps } from "../option";
 
 /**
- * @interface CommandProps
+ * @type CommandProps
  * @description
  * Represents the properties of a command.
  * @property {string} name
  * @property {string} description
  */
-export interface CommandProps {
+export type CommandProps = {
   name: string;
   description: string;
   aliases?: string[];
   options?: Option[];
   subcommands?: Map<string, Command>;
-}
+};
 
 /**
  * @class Command
@@ -64,12 +64,12 @@ export class Command extends EventEmitter {
 
   /**
    * @method addOption
-   * @param {Option} option
+   * @param {OptionProps} option
    * @returns {Command}
    * @description Adds an option to the command
    */
-  public addOption(...option: Option[]): Command {
-    this.options.push(...option);
+  public addOption(...option: OptionProps[]): Command {
+    this.options.push(...option.map((o) => Option.create(o)));
     return this;
   }
 
