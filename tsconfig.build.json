@@ -9,7 +9,7 @@
     "node_modules",
     "tests",
     "dist",
-    "samples",
+    "examples",
     "**/*.spec.ts",
     "coverage",
     ".github",
