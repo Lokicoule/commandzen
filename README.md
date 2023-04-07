@@ -1,10 +1,11 @@
 # CommandZen
 
+The CommandZen Library is a TypeScript library designed to help to create command-line interface (CLI) applications with ease. With a clean and intuitive API, you can register commands, options and execute actions based on user input.
+
 [![Coverage Status](https://coveralls.io/repos/github/Lokicoule/commandzen/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/Lokicoule/commandzen?branch=main)
 
 ## Table of Contents
 
-- [Introduction](#introduction)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -12,7 +13,7 @@
   - [Importing the Library](#importing-the-library)
   - [Creating a CLI Application](#creating-a-cli-application)
 - [API](#api)
-  - [CLI](#cli)
+  - [CliBuilder](#clibuilder)
   - [Command](#command)
   - [Option](#option)
   - [Argument](#argument)
@@ -25,16 +26,11 @@
 - [Contribution](#contribution)
 - [License](#license)
 
-## Introduction
-
-The CommandZen Library is a TypeScript library designed to help you create command-line interface (CLI) applications with ease. With a clean and intuitive API, you can register commands, options, and arguments, handle input validation, and execute actions based on user input.
-
 ## Features
 
-- Simple and intuitive API for registering commands and options
-- Easy handling of arguments and input validation
-- Support for command aliases
-- Help messages generation for commands and options
+- Simple and intuitive API for registering commands/subcommands and options
+- Automatic help generation for commands and subcommands
+- Supports command aliases
 
 ## Requirements
 
@@ -60,317 +56,321 @@ npm install commandzen
 
 To use CommandZen, you need to define commands and options for your CLI. You can do this using the Command and Option classes provided by the library.
 
-### Importing the library
-
 ```ts
-import { CLI, Command, Option, Argument } from "commandzen";
-```
+import { CliBuilder, Command, Option } from "commandzen";
 
-### Creating a CLI application
-
-1. Create a new CLI instance:
-
-```ts
-const cli = new CLI();
-```
-
-2. Register commands and options:
-
-```ts
-const myCommand = Command.create({
-  name: "my-command",
-  description: "A sample command",
-  aliases: ["mc"],
-  options: [
-    Option.create({
-      shortName: "-f",
-      longName: "--file",
-      description: "Path to the input file",
-      argument: Argument.create({
-        type: "string",
-        required: true,
-      }),
-    }),
-  ],
-  action: (options) => {
-    console.log("Executing my-command with options:", options);
-  },
+const cli = CliBuilder.create({
+  name: "mycli",
+  description: "My CLI tool",
 });
 
-cli.registerCommand(myCommand);
-```
+cli
+  .addCommand(
+    Command.create({
+      name: "greet",
+      description: "Greet the user",
+      aliases: ["hello"],
+    })
+      .addOption(
+        {
+          flag: "-f, --first-name <name>",
+          description: "Provide a name to greet",
+        },
+        {
+          flag: "-l, --last-name <lastname>",
+          description: "Provide a lastname to greet",
+        }
+      )
+      .registerAction<{ firstName: string; lastName: string }>(
+        ({ firstName, lastName }) => {
+          console.log(`Hello, ${firstName} ${lastName}!`);
+        }
+      )
+  )
+  .addOption({
+    flag: "-v, --version <version>",
+    description: "Provide a version to the root command",
+  })
+  .registerAction<{ version: string }>(({ version }) => {
+    console.log(`Version: ${version}`);
+  });
 
-3. Parse the command-line arguments:
-
-```ts
-cli.parse(process.argv.slice(2));
-```
-
-4. If you want to display help for the commands:
-
-```ts
-cli.displayHelp();
+cli.parse();
 ```
 
 ## API
 
-### CLI
+The CommandZen API consists of three classes that you can use to build your CLI:
 
-- `registerDefaultOptions(options: Option[])`: Register default options for the CLI.
-- `registerCommand(command: Command)`: Register a command.
-- `registerDefaultCommand(command: Command)`: Register a default command to be executed when no command is provided.
-- `registerHelpCommand()`: Register the help command as subcommand.
-- `parse(args: string[])`: Parse command-line arguments and execute the appropriate command.
-- `displayHelp()`: Display help messages for all registered commands.
-- `getHelp()`: Get help messages for all registered commands as a string.
+### CliBuilder
+
+The CliBuilder class is used to build a CLI (Command Line Interface) application. It provides methods to create, manage, and execute commands and options.
+
+#### Public Methods
+
+- `create(props: CommandProps): CliBuilder`
+
+This static method creates a new CliBuilder instance with the specified [command properties](#commandprops-type).
+
+```ts
+const cli = CliBuilder.create({
+  name: "my-cli",
+  description: "A command line application",
+});
+```
+
+- `addCommand(command: Command): CliBuilder`
+
+This method adds a [command](#command) to the CLI, with an automatically added help option.
+
+```ts
+const myCommand = Command.create({
+  name: "my-command",
+  description: "Performs a specific task",
+});
+
+cli.addCommand(myCommand);
+```
+
+- `addOption(props: OptionProps): CliBuilder`
+
+This method adds an option to the default command.
+
+```ts
+cli.addOption({
+  flag: "-v, --verbose",
+  description: "Enable verbose output",
+});
+```
+
+- `setDefaultCommand(command: Command): CliBuilder`
+
+This method overrides the default [command](#command) with a specified command.
+
+```ts
+const customDefaultCommand = Command.create({
+  name: "custom-default",
+  description: "Custom default command",
+});
+
+cli.setDefaultCommand(customDefaultCommand);
+```
+
+- `addGlobalOption(props: OptionProps): CliBuilder`
+  This method recursively adds an option to all commands
+
+```ts
+cli.addGlobalOption({
+  {
+    flag: "-v, --verbose",
+    description: "Verbosity",
+  }
+})
+```
+
+- `parse(): void`
+
+This method parses the arguments and executes the appropriate command.
+
+```ts
+cli.parse();
+```
 
 ### Command
 
-- `create(properties: CommandProperties)`: Create a new command.
-- `addOption(option: Option)`: Add an option to the command.
-- `execute(options: ParsedOptions)`: Execute the command's action with the provided options.
-- `getHelp()`: Get the help message for the command as a string.
+The Command class represents a single command or subcommand in a CLI application. It contains options and an action to be executed when the command is called.
+
+#### Public Methods
+
+- `create(props: CommandProps): Command`
+
+This static method creates a new Command instance with the specified [properties](#commandprops-type).
+
+```ts
+const myCommand = Command.create({
+  name: "my-command",
+  description: "Performs a specific task",
+  // Optional
+  aliases: ["mc", "m-c"],
+  // Optional
+  options: [
+    Option.create({
+      // Option 1
+    }),
+    Option.create({
+      // Option 2
+    }),
+  ],
+  // Optional
+  subcommands: [
+    Command.create({
+      // Subcommand 1
+    }),
+    Command.create({
+      // Subcommand 2
+    }),
+  ],
+});
+```
+
+- `addSubcommand(command: Command): Command`
+
+This method adds a subcommand to the current command.
+
+```ts
+const parentCommand = Command.create({
+  name: "parent",
+  description: "Parent command",
+});
+
+const childCommand = Command.create({
+  name: "child",
+  description: "Child command",
+});
+
+parentCommand.addSubcommand(childCommand);
+```
+
+- `addOption(...option: OptionProps[]): Command`
+
+This method adds one or more [options](#optionprops-type) to the command.
+
+```ts
+const myCommand = Command.create({
+  name: "my-command",
+  description: "Performs a specific task",
+}).addOption(
+  {
+    flag: "-p, --project <path>",
+    description: "Specify the path to the tsconfig.json file",
+  },
+  {
+    flag: "-i, --install",
+    description: "Install something",
+  }
+);
+```
+
+- `addAlias(...aliases: string[]): Command`
+
+This method adds one or more aliases to the command.
+
+```ts
+const myCommand = Command.create({
+  name: "my-command",
+  description: "Performs a specific task",
+});
+
+myCommand.addAlias("mc", "m-c");
+```
+
+- `registerAction<T>(callback: (props: T) => void): Command`
+
+This method registers an action for the command by attaching a callback function to the command's event.
+
+```ts
+const myCommand = Command.create({
+  name: "my-command",
+  description: "Performs a specific task",
+})
+  .addOption({
+    flag: "-p, --project <name>",
+    description: "Specify the name of the project",
+  })
+  .registerAction<{ project: string }>(({ project }) => {
+    console.log(`Project: ${project}`);
+  });
+```
+
+- `findOption(flag: string): Option | undefined`
+
+This method finds an option by its flag (short or long name).
+
+- `findSubcommand(name: string): Command | undefined`
+
+This method finds a subcommand by its name.
+
+#### CommandProps Type
+
+The `CommandProps` type is used to define the properties of a `Command` object.
+
+- `name` (string): The name of the command. This is the keyword that users will type to invoke the command in the CLI.
+- `description`: A brief description of the command, which will be displayed in the help output.
+- `aliases` (string[] | optional): An array of alternative names for the command. Users can use any of these aliases to invoke the command.
+- `options` (Option[] | optional): An array of `Option` objects that define the options available for the command. Options can be flags or arguments that modify the behavior of the command.
+- `subcommands` (Map<string, Command> | optional): A map of subcommands, with the subcommand name as the key and the `Command` object as the value. Subcommands are additional commands that can be invoked as a part of the parent command.
 
 ### Option
 
-- `create(properties: OptionProperties)`: Create a new option.
-- `getKey()`: Get the key for the option, which is the long name without the -- prefix, or the short name without the - prefix if no long name is provided.
+The `Option` class represents a command line option and is used to define options for commands in a CLI application. It provides methods to create and manage options, including parsing their flags and setting default values.
 
-### Argument
+#### Public Method
 
-- `create(properties: ArgumentProperties)`: Create a new argument.
+- `create(props: OptionProps): Option`
+
+This static method creates a new Option instance with the specified [properties](#optionprops-type).
+
+```ts
+const verboseOption = Option.create({
+  flag: "-v, --verbose",
+  description: "Enable verbose output",
+});
+```
+
+#### OptionProps Type
+
+The `OptionProps` type represents the properties of an option and includes the following properties:
+
+- `flag` (string): A string representing the option's flag, such as -v, --verbose.
+- `description` (string): A string describing the option's purpose.
+- `defaultValue` (unknown | undefined): An optional default value for the option.
+
+####
 
 ## Example
 
-```ts
-import { CLI, Command, Option, Argument } from "commandzen";
-
-const cli = new CLI();
-
-// Default command
-const defaultCommand = Command.create({
-  name: "default",
-  description:
-    "This is the default command that runs when no command is provided",
-  options: [
-    Option.create({
-      shortName: "-n",
-      longName: "--name",
-      description: "Your name",
-      argument: Argument.create({
-        type: "string",
-        required: true,
-      }),
-    }),
-  ],
-  action: (options) => {
-    console.log(`Hello, ${options.name}! This is the default command.`);
-  },
-});
-
-// Register default command
-cli.registerDefaultCommand(defaultCommand);
-
-// Custom command
-const customCommand = Command.create({
-  name: "custom",
-  description: "This is a custom command",
-  options: [
-    Option.create({
-      shortName: "-t",
-      longName: "--text",
-      description: "Custom text",
-      argument: Argument.create({
-        type: "string",
-        required: true,
-      }),
-    }),
-  ],
-  action: (options) => {
-    console.log(`Custom command with text: ${options.text}`);
-  },
-});
-
-// Register custom command
-cli.registerCommand(customCommand);
-
-// Parse command-line arguments
-cli.parse(process.argv.slice(2));
-```
-
 ## Advanced Usage
 
-This section provides examples and guidance on more advanced use cases of the CommandZen library.
-
-### Default options
-
-1. Configuring Default Options through the CLI Constructor
-
-When creating a new instance of the CLI class, you can provide an optional configuration object that allows you to set default options. This approach is useful when you have a set of default options that you know will be applied to all commands in your application. Here's an example:
-
-```ts
-import { CLI, Option, Argument } from "commandzen";
-
-const defaultOptions = [
-  Option.create({
-    shortName: "-v",
-    longName: "--verbose",
-    description: "Enable verbose output",
-    argument: Argument.create({
-      type: "boolean",
-      required: false,
-      defaultValue: false,
-    }),
-  }),
-];
-
-const cli = new CLI({ defaultOptions });
-```
-
-2. Configuring Default Options Using the `registerDefaultOptions` Method
-   Alternatively, you can use the `registerDefaultOptions` method to set default options after creating the CLI instance. This approach is helpful when the default options depend on external factors or need to be determined dynamically.
-
-```ts
-import { CLI, Option, Argument } from "commandzen";
-
-const cli = new CLI();
-
-const defaultOptions = [
-  Option.create({
-    shortName: "-v",
-    longName: "--verbose",
-    description: "Enable verbose output",
-    argument: Argument.create({
-      type: "boolean",
-      required: false,
-      defaultValue: false,
-    }),
-  }),
-];
-
-cli.registerDefaultOptions(defaultOptions);
-```
-
-3. When to Use Each Approach
-
-You might prefer to use the CLI constructor to set default options when you have a predefined set of options that apply to all commands in your application. This approach keeps the configuration in one place and makes the code more readable.
-
-On the other hand, using the registerDefaultOptions method can be beneficial when you need to set default options based on external factors, such as user input, environment variables, or configuration files. This approach allows you to modify the default options at runtime and provides greater flexibility.
-
-### Default command
-
-The `registerDefaultCommand(command: Command)` method allows you to replace the built-in default command with a custom one. The default command is executed when no specific command is provided by the user. This is useful when you want to provide a default behavior for your CLI application without requiring the user to specify a command.
-
-```ts
-const defaultCommand = Command.create({
-  name: "default",
-  description: "This is the custom default command",
-  options: [
-    Option.create({
-      shortName: "-n",
-      longName: "--name",
-      description: "Your name",
-      argument: Argument.create({
-        type: "string",
-        required: true,
-      }),
-    }),
-  ],
-  action: (options) => {
-    console.log(`Hello, ${options.name}! This is the custom default command.`);
-  },
-});
-
-cli.registerDefaultCommand(defaultCommand);
-cli.registerHelpCommand();
-```
+This section demonstrates advanced usage patterns with the CliBuilder, Command, and Option APIs to build a powerful and flexible CLI application.
 
 ### Subcommands
 
-CommandZen allows you to create hierarchical commands or subcommands. To achieve this, create a command and register subcommands within the parent command's action.
+You can create subcommands by chaining the addCommand method on a parent Command object:
 
 ```ts
-import { CLI, Command, Option, Argument } from "commandzen";
+const cli = new CliBuilder("my-cli", "A powerful CLI application");
 
-const cli = new CLI();
+const mainCommand = Command.create({
+  name: "main",
+  description: "The main command",
+})
+  .addOption({
+    // main options...
+  })
+  .addAction(() => console.log("Executing main command"));
 
-const parentCommand = Command.create({
-  name: "parent",
-  description: "This is a parent command with subcommands",
-  action: (options) => {
-    console.log("Executing parent command with options:", options);
-  },
-});
+const subCommand1 = Command.create({
+  name: "sub1",
+  description: "Subcommand 1",
+}).addAction(() => console.log("Executing subcommand 1"));
 
-const subCommandA = Command.create({
-  name: "subA",
-  description: "This is a subcommand A",
-  action: (options) => {
-    console.log("Executing subcommand A with options:", options);
-  },
-});
+const subCommand2 = Command.create({
+  name: "sub2",
+  description: "Subcommand 2",
+}).addAction(() => console.log("Executing subcommand 2"));
 
-const subCommandB = Command.create({
-  name: "subB",
-  description: "This is a subcommand B",
-  action: (options) => {
-    console.log("Executing subcommand B with options:", options);
-  },
-});
-
-parentCommand.addOption(
-  Option.create({ shortName: "-s", longName: "--subcommand" })
-);
-cli.registerCommand(parentCommand);
-cli.registerHelpCommand();
-
-cli.parse(process.argv.slice(2));
-
-const subcommand = process.argv[3];
-if (subcommand === "subA") {
-  subCommandA.execute(cli.options);
-} else if (subcommand === "subB") {
-  subCommandB.execute(cli.options);
-}
+mainCommand.addCommand(subCommand1).addCommand(subCommand2);
+cli.addCommand(mainCommand);
 ```
 
-### Help Command
+Now the CLI application supports `my-cli main sub1` and `my-cli main sub2` commands.
 
-By calling `registerHelpCommand()`, the CLI instance will create a subcommand named help that will display the usage help message. This subcommand can be called by running `my-cli help`.
+### Global Options
 
-However, it's important to note that `registerHelpCommand()` should be called after registering the default command, if one is used. This is because when you override the default command, you "lose" its options, which can render the help message unreachable.
-
-```ts
-import { CLI } from "commandzen";
-
-const cli = new CLI();
-
-cli.registerDefaultCommand(myDefaultCommand);
-cli.registerHelpCommand();
-cli.parse(process.argv.slice(2));
-```
-
-### Customizing Help Messages
-
-You can customize the help messages by extending the Command class and overriding the `getHelp()` method.
+You can define global options that apply to all commands and subcommands:
 
 ```ts
-class CustomCommand extends Command {
-  getHelp(): string {
-    // Customize the help message as needed.
-    return `Custom help message for ${this.name}\n`;
-  }
-}
 
-const customCommand = CustomCommand.create({
-  name: "custom",
-  description: "This is a custom command with a custom help message",
-  action: (options) => {
-    console.log("Executing custom command with options:", options);
-  },
-});
-
-cli.registerCommand(customCommand);
 ```
 
 ## Contribution
