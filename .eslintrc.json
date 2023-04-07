@@ -10,6 +10,6 @@
     "dist",
     "coverage",
     "node_modules",
-    "samples"
+    "examples"
   ]
 }

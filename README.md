@@ -14,6 +14,7 @@ The CommandZen Library is a TypeScript library designed to help to create comman
   - [CliBuilder](#clibuilder)
   - [Command](#command)
   - [Option](#option)
+- [Examples](#examples)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -320,6 +321,25 @@ The `OptionProps` type represents the properties of an option and includes the f
 - `flag` (string): A string representing the option's flag, such as -v, --verbose.
 - `description` (string): A string describing the option's purpose.
 - `defaultValue` (unknown | undefined): An optional default value for the option.
+
+## Examples
+
+We have provided some real-world inspired examples to help you understand how to use CommandZen effectively. These examples are located in the `examples` folder.
+
+1. [File Management](https://github.com/lokicoule/commandzen/blob/main/examples/file_management.ts): A simple file management CLI tool inspired by Unix commands such as `cp`, `rm`, and `mv`.
+2. [Request Management](https://github.com/lokicoule/commandzen/blob/main/examples/request_management.ts): A CLI tool (inspired by `curl`) that can send HTTP requests and display the response.
+3. [Package Management](https://github.com/lokicoule/commandzen/blob/main/examples/package_management.ts): A package management CLI tool inspired by `npm` and `yarn` with commands to install, update, and remove packages.
+
+To run these examples, navigate to the `examples` folder and execute the TypeScript files with `ts-node` or transpile them to JavaScript and run using `node`. Make sure you have the necessary dependencies installed.
+
+Example:
+
+```sh
+cd examples
+ts-node file_management.ts
+```
+
+Keep in mind that these examples are meant for educational purposes only and might not cover all possible use cases. They are meant to give you an idea of how to build CLI tools using CommandZen. Feel free to modify and extend these examples to fit your needs.
 
 ## Contribution
 
