@@ -34,32 +34,24 @@ describe("CommandParser", () => {
 
   it("should parse command with options", () => {
     const argv = ["-f", "value1", "--flag", "value2"];
-    const commandList = CommandParser.parse(command, argv);
-    expect(commandList).toEqual([
-      {
-        command: command,
-        options: {
-          flag: "value2",
-        },
+    const commandSubtest = CommandParser.parse(command, argv);
+    expect(commandSubtest).toEqual({
+      command: command,
+      options: {
+        flag: "value2",
       },
-    ]);
+    });
   });
 
   it("should parse command with subcommand and options", () => {
     const argv = ["subtest", "-s", "value1", "--subflag", "value2"];
-    const commandList = CommandParser.parse(command, argv);
-    expect(commandList).toEqual([
-      {
-        command: command,
-        options: {},
+    const commandSubtest = CommandParser.parse(command, argv);
+    expect(commandSubtest).toEqual({
+      command: subcommand,
+      options: {
+        subflag: "value2",
       },
-      {
-        command: subcommand,
-        options: {
-          subflag: "value2",
-        },
-      },
-    ]);
+    });
   });
 
   it("should parse command with subcommand and options for both", () => {
@@ -74,21 +66,13 @@ describe("CommandParser", () => {
       "--subflag",
       "value4",
     ];
-    const commandList = CommandParser.parse(command, argv);
-    expect(commandList).toEqual([
-      {
-        command: command,
-        options: {
-          flag: "value1",
-        },
+    const commandSubtest = CommandParser.parse(command, argv);
+    expect(commandSubtest).toEqual({
+      command: subcommand,
+      options: {
+        subflag: "value4",
       },
-      {
-        command: subcommand,
-        options: {
-          subflag: "value4",
-        },
-      },
-    ]);
+    });
   });
 
   it("should handle missing required option value", () => {

@@ -23,7 +23,7 @@ export class CommandParser {
    * @description
    * Parses the arguments and returns a list of commands.
    */
-  public static parse(command: Command, argv: string[]): Array<CommandResult> {
+  public static parse(command: Command, argv: string[]): CommandResult {
     const initialState: CommandResult = {
       command,
       options: {},
@@ -40,7 +40,8 @@ export class CommandParser {
       [initialState]
     );
 
-    return commandList;
+    // Return the last command in the list
+    return commandList[commandList.length - 1];
   }
 
   /**

@@ -96,27 +96,8 @@ export class CliBuilder {
    * Parses the arguments and executes the command.
    */
   public parse(argv: string[] = process.argv.slice(2)): void {
-    const commandList = CommandParser.parse(this.defaultCommand, argv);
-    this.runCommands(commandList);
-  }
-
-  /**
-   * @method runCommands
-   * @param {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>} commandList
-   * @returns {void}
-   * @description
-   * Runs the commands.
-   */
-  private runCommands(
-    commandList: Array<{
-      command: Command;
-
-      options: Record<string, string | boolean>;
-    }>
-  ): void {
-    for (const { command, options } of commandList) {
-      CommandRunner.run(command, options);
-    }
+    const command = CommandParser.parse(this.defaultCommand, argv);
+    CommandRunner.run(command.command, command.options);
   }
 
   /**
