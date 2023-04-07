@@ -8,9 +8,7 @@
     "subcommand",
     "cli",
     "option",
-    "argument",
     "parser",
-    "args",
     "argv"
   ],
   "author": "Loik F.",
