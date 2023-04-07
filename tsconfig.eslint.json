@@ -1,9 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "declaration": true,
-    "declarationDir": "dist/types"
-  },
   "include": ["lib/**/*"],
   "exclude": [
     "node_modules",
@@ -14,9 +10,5 @@
     "coverage",
     ".github",
     ".vscode"
-  ],
-  "references": [
-    { "path": "./tsconfig.build.cjs.json" },
-    { "path": "./tsconfig.build.esm.json" }
   ]
 }

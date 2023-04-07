@@ -1,50 +1,107 @@
-import { ArgumentValue } from "../argument/Argument";
-import { OptionParser } from "../option/OptionParser";
 import { Command } from "./Command";
 
-export type ParsedOptions = Record<string, ArgumentValue>;
+type CommandResult = {
+  command: Command;
+  options: Record<string, string | boolean>;
+};
 
+/**
+ * @class CommandParser
+ * @description
+ * Parses the arguments and returns a list of commands.
+ */
 export class CommandParser {
-  public static parseOptions<T = ParsedOptions>(
-    command: Command<T>,
-    args: string[]
-  ): ParsedOptions {
-    const options: ParsedOptions = {};
-
-    let i = 0;
-    while (i < args.length) {
-      const arg = args[i];
-      if (arg.startsWith("-")) {
-        const option = command.findOption(arg);
-        if (!option) {
-          throw new Error(`Unknown option: ${arg}`);
-        }
-
-        const { value, index } = OptionParser.parse(option, args, i);
-        const optionKey = option.getKey();
-        options[optionKey] = value;
-        i = index + 1;
-      } else {
-        i++;
-      }
-    }
-
-    return options;
+  private constructor() {
+    // Private constructor to prevent instantiation
   }
 
-  public static validateOptions<T = ParsedOptions>(
-    command: Command<T>,
-    options: ParsedOptions
-  ): void {
-    const optionKeys = command.options.map((option) => option.getKey());
-    for (const key in options) {
-      if (!optionKeys.includes(key)) {
-        throw new Error(`Unknown option: ${key}`);
-      }
-      const option = command.findOption(key);
-      if (option?.argument?.required && options[key] === undefined) {
-        throw new Error(`Missing required option: ${option.longName}`);
+  /**
+   * @method parse
+   * @param {Command} command
+   * @param {string[]} argv
+   * @returns {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>}
+   * @description
+   * Parses the arguments and returns a list of commands.
+   */
+  public static parse(command: Command, argv: string[]): Array<CommandResult> {
+    const initialState: CommandResult = {
+      command,
+      options: {},
+    };
+
+    const commandList = argv.reduce<Array<CommandResult>>(
+      (acc, arg, index, arr) => {
+        if (!arg.startsWith("-")) {
+          return this.handleSubcommand(arg, acc);
+        } else {
+          return this.handleOption(arg, acc, arr, index);
+        }
+      },
+      [initialState]
+    );
+
+    return commandList;
+  }
+
+  /**
+   * @method handleSubcommand
+   * @param {string} arg
+   * @param {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>} commandList
+   * @returns {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>}
+   * @description
+   * Handles a subcommand.
+   */
+  private static handleSubcommand(
+    arg: string,
+    commandList: CommandResult[]
+  ): CommandResult[] {
+    const currentCommandResult = commandList[commandList.length - 1];
+    const subcommand = currentCommandResult.command.findSubcommand(arg);
+
+    if (subcommand) {
+      commandList.push({
+        command: subcommand,
+        options: {},
+      });
+    }
+
+    return commandList;
+  }
+
+  /**
+   * @method handleOption
+   * @param {string} arg
+   * @param {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>} commandList
+   * @param {string[]} argv
+   * @param {number} index
+   * @returns {Array<{ command: Command; args: string[]; options: Record<string, string | boolean> }>}
+   * @description
+   * Handles an option.
+   */
+  private static handleOption(
+    arg: string,
+    commandList: CommandResult[],
+    argv: string[],
+    index: number
+  ): CommandResult[] {
+    const currentCommandResult = commandList[commandList.length - 1];
+    const option = currentCommandResult.command.findOption(arg);
+
+    if (option) {
+      const nextArg = argv[index + 1];
+      if (nextArg && !nextArg.startsWith("-")) {
+        currentCommandResult.options[option.key] = nextArg;
+      } else {
+        if (option.required) {
+          console.error(
+            `The option "${option.flag}" requires an argument, but it was not provided.`
+          );
+          process.exit(1);
+        }
+        currentCommandResult.options[option.key] = true;
       }
     }
+
+    return commandList;
   }
 }

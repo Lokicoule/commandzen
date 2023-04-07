@@ -1,224 +1,143 @@
-import { Argument, Command, Option, ParsedOptions } from "../../lib";
+import { Command, Option } from "../../lib";
 
 describe("Command", () => {
-  describe("constructor", () => {
-    it("should create a command with the given properties", () => {
-      const properties = {
-        name: "test",
-        description: "Test command",
-        aliases: ["t"],
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-            argument: Argument.create({ type: "string" }),
-          }),
-        ],
-        action: () => {},
-      };
+  let command: Command;
 
-      const command = new Command(properties);
-
-      expect(command.name).toBe(properties.name);
-      expect(command.description).toBe(properties.description);
-      expect(command.aliases).toEqual(properties.aliases);
-      expect(command.options).toEqual(properties.options);
-      expect(command.action).toEqual(properties.action);
+  beforeEach(() => {
+    command = Command.create({
+      name: "test",
+      description: "Test command",
     });
   });
 
-  describe("option", () => {
-    it("should override the options with new options", () => {
-      const command = new Command({
-        name: "test",
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-          }),
-        ],
-      });
-      const overrideOption = new Option({
-        shortName: "-o",
-        longName: "--override",
-        description: "Override the last option",
-      });
-      command.options = [overrideOption];
+  it("should create a command with name and description", () => {
+    expect(command.name).toEqual("test");
+    expect(command.description).toEqual("Test command");
+  });
 
-      expect(command.options).toEqual([overrideOption]);
+  it("should add subcommand", () => {
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
     });
 
-    it("should clear the options if the new options are undefined", () => {
-      const command = new Command({
-        name: "test",
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-          }),
-        ],
-      });
+    command.addSubcommand(subcommand);
+    expect(command.subcommands.get("subtest")).toEqual(subcommand);
+  });
 
-      command.options = undefined;
+  it("should add an alias to the command", () => {
+    command.addAlias("t", "u", "v");
+    expect(command.aliases).toContain("t");
+    expect(command.aliases).toContain("u");
+    expect(command.aliases).toContain("v");
+  });
 
-      expect(command.options).toEqual([]);
+  it("should add aliases for subcommands", () => {
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+      aliases: ["st", "subt"],
+    });
+
+    command.addSubcommand(subcommand);
+
+    // Check if the subcommand and its aliases were added correctly
+    expect(command.subcommands.get("subtest")).toEqual(subcommand);
+    expect(command.subcommands.get("st")).toEqual(subcommand);
+    expect(command.subcommands.get("subt")).toEqual(subcommand);
+  });
+
+  it("should add an option to the command", () => {
+    const option = {
+      flag: "-f, --flag",
+      description: "Test flag",
+    };
+    const parsedOption = Option.create(option);
+
+    command.addOption(option);
+    expect(command.options).toContainEqual(parsedOption);
+  });
+
+  it("should find an option by its flag", () => {
+    const option = Option.create({
+      flag: "-f, --flag",
+      description: "Test flag",
+    });
+
+    command.addOption(option);
+    expect(command.findOption("-f")).toEqual(option);
+    expect(command.findOption("--flag")).toEqual(option);
+  });
+
+  it("should find a subcommand by its name", () => {
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+    });
+
+    command.addSubcommand(subcommand);
+    expect(command.findSubcommand("subtest")).toEqual(subcommand);
+  });
+
+  it("should register and trigger an action for the command", (done) => {
+    command.registerAction<{ flag: boolean }>((props) => {
+      expect(props).toEqual({ flag: true });
+      done();
+    });
+
+    command.emit("test", {
+      flag: true,
     });
   });
 
-  describe("addOption", () => {
-    it("should add an option to the command's options", () => {
-      const command = new Command({ name: "test" });
+  it("should print the help message correctly", () => {
+    const rootCommand = Command.create({
+      name: "test",
+      description: "Test command",
+    });
+    const subcommand = Command.create({
+      name: "subtest",
+      description: "Subtest command",
+    }).addSubcommand(
+      Command.create({
+        name: "subsubtest",
+        description: "Subsubtest command",
+      })
+    );
 
-      const option = Option.create({
-        shortName: "-f",
-        longName: "--file",
-        description: "Specify the input file",
-        argument: Argument.create({ type: "string" }),
-      });
+    rootCommand.addSubcommand(subcommand);
 
-      command.addOption(option);
-      expect(command.options).toEqual([option]);
+    const option = Option.create({
+      flag: "-f, --flag",
+      description: "Test flag",
     });
 
-    it("should return the command instance", () => {
-      const command = new Command({ name: "test" });
+    rootCommand.addOption(option);
 
-      const option = new Option({
-        shortName: "-f",
-        longName: "--file",
-        description: "Specify the input file",
-        argument: Argument.create({ type: "string" }),
-      });
+    // Mock console.info to capture printed output
+    const consoleInfoSpy = jest
+      .spyOn(console, "info")
+      .mockImplementation(() => {});
 
-      const result = command.addOption(option);
+    rootCommand.help();
 
-      expect(result).toBe(command);
-    });
-  });
+    expect(consoleInfoSpy.mock.calls).toEqual([
+      ["Usage: test [options]"],
+      ["\nTest command"],
+      ["\nOptions:"],
+      ["  -f, --flag  Test flag"],
+      [],
+      ["\nSubcommands:"],
+      ["  1. subtest"],
+      ["  Usage: test subtest [options]"],
+      ["\n  Subtest command"],
+      ["\n  Subcommands:"],
+      ["    1.1. subsubtest"],
+      ["    Usage: test subtest subsubtest [options]"],
+      ["\n    Subsubtest command"],
+      ["Run test [command] --help for more information on a command."],
+    ]);
 
-  describe("execute", () => {
-    describe("execute", () => {
-      it("should execute a synchronous action", () => {
-        let actionExecuted = false;
-        const syncAction = (options: ParsedOptions) => {
-          actionExecuted = true;
-        };
-
-        const command = new Command({
-          name: "sync",
-          action: syncAction,
-        });
-
-        command.execute({});
-
-        expect(actionExecuted).toBe(true);
-      });
-
-      it("should execute an asynchronous action", async () => {
-        let actionExecuted = false;
-        const asyncAction = async (options: ParsedOptions) => {
-          return new Promise<void>((resolve) => {
-            setTimeout(() => {
-              actionExecuted = true;
-              resolve();
-            }, 100);
-          });
-        };
-
-        const command = new Command({
-          name: "async",
-          action: asyncAction,
-        });
-
-        await command.execute({});
-
-        expect(actionExecuted).toBe(true);
-      });
-    });
-  });
-
-  describe("findOption", () => {
-    it("should return the option with the given short name", () => {
-      const command = new Command({
-        name: "test",
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-          }),
-        ],
-      });
-
-      const option = command.findOption("f");
-
-      expect(option?.shortName).toBe("-f");
-    });
-
-    it("should return undefined if no option with the given short name exists", () => {
-      const command = new Command({
-        name: "test",
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-          }),
-        ],
-      });
-
-      const option = command.findOption("-u");
-
-      expect(option).toBeUndefined();
-    });
-  });
-
-  describe("getHelp", () => {
-    it("should return the command's help text", () => {
-      const command = new Command({
-        name: "test",
-        description: "Test command",
-        options: [
-          new Option({
-            shortName: "-f",
-            longName: "--file",
-            description: "Specify the input file",
-            argument: Argument.create({ type: "string", required: true }),
-          }),
-          new Option({
-            shortName: "-v",
-            longName: "--verbose",
-            description: "Enable verbose logging",
-          }),
-        ],
-      });
-
-      const help = command.getHelp();
-
-      expect(help).toEqual(
-        "test\n  Test command\n  Options:\n    -f, --file <string>, Specify the input file\n    -v, --verbose, Enable verbose logging\n"
-      );
-    });
-  });
-
-  describe("action", () => {
-    it("should return the action function", () => {
-      const action = () => {};
-      const command = new Command({ name: "test", action });
-
-      expect(command.action).toBe(action);
-    });
-
-    it("should set the action function", () => {
-      const command = new Command({ name: "test" });
-      const action = () => {};
-
-      command.action = action;
-
-      expect(command.action).toBe(action);
-    });
+    consoleInfoSpy.mockRestore();
   });
 });
